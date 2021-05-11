@@ -203,24 +203,21 @@ namespace Library.DataGenerator
                 {
                     StartTime = MaternityStartTime,
                     EndTime = MaternityEndTime,
-                    ReservedRoom = AvailableMaternityRoom,
-                    AssociatedBirth = Birth
+                    ReservedRoomId = AvailableMaternityRoom.Id
                 };
 
                 var BirthRes = new Reservation
                 {
                     StartTime = BirthStartTime,
                     EndTime = BirthEndTime,
-                    ReservedRoom = AvailableBirthRoom,
-                    AssociatedBirth = Birth
+                    ReservedRoomId = AvailableBirthRoom.Id
                 };
 
                 var RestRes = new Reservation
                 {
                     StartTime = RestStartTime,
                     EndTime = RestEndTime,
-                    ReservedRoom = AvailableRestRoom,
-                    AssociatedBirth = Birth
+                    ReservedRoomId = AvailableRestRoom.Id
                 };
 
                 reservations = new List<Reservation> { MaternityRes, BirthRes, RestRes };

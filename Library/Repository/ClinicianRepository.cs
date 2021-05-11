@@ -12,6 +12,8 @@ namespace Library.Repository
 {
     class ClinicianRepository : IClinicianRepository
     {
+        // Initialization
+
         private MongoClient _client;
         private IMongoCollection<Clinician> _clinicians;
 
@@ -22,16 +24,12 @@ namespace Library.Repository
                 .GetCollection<Clinician>(nameof(Clinician));
         }
 
+        // CRUD
+
         public async Task<int> Create(Clinician clinician)
         {
             await _clinicians.InsertOneAsync(clinician);
             return clinician.Id;
-        }
-
-        public async Task<bool> Delete(int id)
-        {
-            var res = await _clinicians.DeleteOneAsync(c => c.Id == id);
-            return res.DeletedCount == 1;
         }
 
         public async Task<Clinician> Get(int id)
@@ -43,7 +41,6 @@ namespace Library.Repository
         {
             return await _clinicians.Find(_ => true).ToListAsync();
         }
-
         public Task<IEnumerable<Clinician>> GetAllMatching(List<string> ids)
         {
             throw new NotImplementedException();
@@ -59,6 +56,12 @@ namespace Library.Repository
 
             var res = await _clinicians.UpdateOneAsync(c => c.Id == id, update);
             return res.ModifiedCount == 1;
+        }
+
+        public async Task<bool> Delete(int id)
+        {
+            var res = await _clinicians.DeleteOneAsync(c => c.Id == id);
+            return res.DeletedCount == 1;
         }
     }
 }
