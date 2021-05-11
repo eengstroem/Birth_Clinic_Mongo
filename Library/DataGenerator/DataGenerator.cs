@@ -7,10 +7,12 @@ using Library.Models.Clinicians;
 using Library.Models.FamilyMembers;
 using Library.Models.Reservations;
 using Library.Models.Rooms;
+using Library.Repository;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using static Library.Factory.FamilyMembers.FamilyMemberFactory;
 
 namespace Library.DataGenerator
@@ -19,67 +21,65 @@ namespace Library.DataGenerator
     {
 
         private static readonly int HowManyBirthsToGenerate = 30;
-        public static void GenerateStaticData(BirthClinicDbContext Context)
+        public static async void GenerateStaticData(ClinicianRepository ClinicianRepo, RoomRepository RoomRepo)
         {
             //create midwives
             for (int i = 0; i < 10; i++)
             {
-                Context.Clinicians.Add(ClinicianFactory.CreateFakeClinician(ClinicianType.MIDWIFE));
+                await ClinicianRepo.Create(ClinicianFactory.CreateFakeClinician(ClinicianType.MIDWIFE));
             }
 
             //create nurses
             for (int i = 0; i < 20; i++)
             {
-                Context.Clinicians.Add(ClinicianFactory.CreateFakeClinician(ClinicianType.NURSE));
+                await ClinicianRepo.Create(ClinicianFactory.CreateFakeClinician(ClinicianType.NURSE));
             }
 
             //create assistants
             for (int i = 0; i < 20; i++)
             {
-                Context.Clinicians.Add(ClinicianFactory.CreateFakeClinician(ClinicianType.HEALTH_ASSISTANT));
+                await ClinicianRepo.Create(ClinicianFactory.CreateFakeClinician(ClinicianType.HEALTH_ASSISTANT));
             }
 
             //create Doctors
             for (int i = 0; i < 5; i++)
             {
-                Context.Clinicians.Add(ClinicianFactory.CreateFakeClinician(ClinicianType.DOCTOR));
+                await ClinicianRepo.Create(ClinicianFactory.CreateFakeClinician(ClinicianType.DOCTOR));
             }
 
             //create Secretaries
             for (int i = 0; i < 4; i++)
             {
-                Context.Clinicians.Add(ClinicianFactory.CreateFakeClinician(ClinicianType.SECRETARY));
+                await ClinicianRepo.Create(ClinicianFactory.CreateFakeClinician(ClinicianType.SECRETARY));
             }
 
             //create Maternity Rooms
             for (int i = 0; i < 22; i++)
             {
-                Context.Rooms.Add(RoomFactory.CreateRoom(RoomType.MATERNITY));
+                await RoomRepo.Create(RoomFactory.CreateRoom(RoomType.MATERNITY));
             }
 
             //create Rest Rooms
             for (int i = 0; i < 5; i++)
             {
-                Context.Rooms.Add(RoomFactory.CreateRoom(RoomType.REST));
+                await RoomRepo.Create(RoomFactory.CreateRoom(RoomType.REST));
             }
 
             //create Birth Rooms
             for (int i = 0; i < 15; i++)
             {
-                Context.Rooms.Add(RoomFactory.CreateRoom(RoomType.BIRTH));
+                await RoomRepo.Create(RoomFactory.CreateRoom(RoomType.BIRTH));
             }
 
-            //Save before adding births. 
-            Context.SaveChanges();
         }
 
-        public static void GenerateData(BirthClinicDbContext Context)
+        public static void GenerateData(ClinicianRepository ClinicianRepo, RoomRepository RoomRepo, BirthRepository BirthRepo)
         {
             //Adding 136 Births since there are 5000 births per year (13.6 per day), and we want to simulate 10 days of fake data.
             for (int i = 0; i < HowManyBirthsToGenerate; i++)
             {
                 var B = BirthFactory.CreateFakeBirth();
-                if (!CreateReservations(Context, B, out List<Reservation> reservations))
+                if (!CreateReservations(RoomRepo,BirthRepo, B, out List<Reservation> reservations))
                 {
                     Console.WriteLine("We are out of rooms");
                     continue;
@@ -111,19 +111,11 @@ namespace Library.DataGenerator
         }
 
         //TODO switch to single instead of where
-        public static Room FindAvailableRooms(DbSet<Room> Rooms, DateTime StartTime, DateTime EndTime, RoomType Type)
+        public async static Task<Room> FindAvailableRooms(RoomRepository RoomRepo, BirthRepository BirthRepo, DateTime StartTime, DateTime EndTime, RoomType Type)
         {
             try
             {
-                return Rooms.First(room =>
-
-                        //search for conflicts
-                        room.RoomType == Type && !room.CurrentReservations.Any(res =>
-                        (StartTime >= res.StartTime && StartTime <= res.EndTime)
-                        ||
-                        (EndTime >= res.StartTime && EndTime <= res.EndTime)
-                        )//Only returns true if there are no conflicts
-                     );
+                return await BirthRepo.GetFirstRoomOfTypeOutsideOfTimeSlot(StartTime, EndTime,Type,RoomRepo);
             }
             catch
             {
@@ -174,7 +166,7 @@ namespace Library.DataGenerator
 
         }
 
-        public static bool CreateReservations(BirthClinicDbContext Context, Birth Birth, out List<Reservation> reservations)
+        public static bool CreateReservations(RoomRepository RoomRepo, BirthRepository BirthRepo, Birth Birth, out List<Reservation> reservations)
         {
             var MaternityStartTime = Birth.BirthDate.AddHours(-132);
             var MaternityEndTime = Birth.BirthDate.AddHours(-12);
@@ -185,9 +177,9 @@ namespace Library.DataGenerator
             var BirthStartTime = Birth.BirthDate.AddHours(-12);
             var BirthEndTime = Birth.BirthDate;
 
-            var AvailableMaternityRoom = FindAvailableRooms(Context.Rooms, MaternityStartTime, MaternityEndTime, RoomType.MATERNITY);
-            var AvailableBirthRoom = FindAvailableRooms(Context.Rooms, MaternityStartTime, MaternityEndTime, RoomType.BIRTH);
-            var AvailableRestRoom = FindAvailableRooms(Context.Rooms, MaternityStartTime, MaternityEndTime, RoomType.REST);
+            var AvailableMaternityRoom = FindAvailableRooms(RoomRepo, BirthRepo, MaternityStartTime, MaternityEndTime, RoomType.MATERNITY);
+            var AvailableBirthRoom = FindAvailableRooms(RoomRepo, BirthRepo, MaternityStartTime, MaternityEndTime, RoomType.BIRTH);
+            var AvailableRestRoom = FindAvailableRooms(RoomRepo, BirthRepo, MaternityStartTime, MaternityEndTime, RoomType.REST);
 
             //Not possible to create a birth at the given time. Find another  hospital.
             if (AvailableBirthRoom == null || AvailableMaternityRoom == null || AvailableRestRoom == null)

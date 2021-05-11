@@ -106,6 +106,43 @@ namespace Library.Repository
             return result;
 
         }
+        public async Task<IEnumerable<Reservation>> GetAllReservations()
+        {
+            var births = await GetAll();
+            List<Reservation> reservations = null;
+            foreach(Birth b in births)
+            {
+                foreach(Reservation r in b.Reservations)
+                {
+                    reservations.Add(r);
+                }
+            }
+
+            return reservations;
+        }
+
+        public async Task<Room> GetFirstRoomOfTypeOutsideOfTimeSlot(DateTime StartTime, DateTime EndTime,RoomType type,RoomRepository RoomRepo)
+        {
+            var reservations = await GetAllReservations();
+            IEnumerable<Room> rooms = await RoomRepo.GetAll();
+            Room FinalRoom = null;
+
+            foreach (Reservation r in reservations)
+            {
+                if(r.StartTime <= StartTime && r.EndTime <= StartTime || r.EndTime > EndTime && r.StartTime > EndTime)
+                {
+                    foreach(Room room in rooms)
+                    {
+                        if (r.ReservedRoomId == room.Id && room.RoomType == type)
+                        {
+                            FinalRoom = room;
+                            break;
+                        }
+                    }
+                }
+            }
+            return FinalRoom;
+        }
 
         public async Task<bool> EndBirth(int id)
         {
