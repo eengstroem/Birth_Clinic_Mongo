@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Library.Repository
 {
-    class RoomRepository : IRoomRepository
+    public class RoomRepository : IRoomRepository
     {
         // Initialization
 

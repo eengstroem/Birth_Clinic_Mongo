@@ -10,7 +10,7 @@ using MongoDB.Bson;
 
 namespace Library.Repository
 {
-    class ClinicianRepository : IClinicianRepository
+    public class ClinicianRepository : IClinicianRepository
     {
         // Initialization
 

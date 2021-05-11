@@ -1,5 +1,4 @@
-﻿using Library.Context;
-using Library.Factory.Births;
+﻿using Library.Factory.Births;
 using Library.Factory.Clinicians;
 using Library.Factory.FamilyMembers;
 using Library.Factory.Rooms;
@@ -417,8 +416,7 @@ namespace Library.DataGenerator
                 {
                     StartTime = StartTime,
                     EndTime = EndTime,
-                    ReservedRoom = AvailableRoom,
-                    AssociatedBirth = B
+                    ReservedRoomId = AvailableRoom.Id
                 };
 
                 Context.Reservations.Add(reservation);

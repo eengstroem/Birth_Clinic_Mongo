@@ -67,8 +67,8 @@ namespace Application
             var MongoConn = new MongoConnection("mongodb://localhost:27017");
             SC.AddSingleton(new MongoClient(MongoConn.ConnString));
             SC.AddSingleton<IBirthRepository, BirthRepository>();
-            //SC.AddSingleton<IClinicianRepository, ClinicianRepository>();
-            //SC.AddSingleton<IRoomRepository, RoomRepository>();
+            SC.AddSingleton<IClinicianRepository, ClinicianRepository>();
+            SC.AddSingleton<IRoomRepository, RoomRepository>();
         }
     }
 }
