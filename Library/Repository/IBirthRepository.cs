@@ -11,20 +11,17 @@ namespace Library.Repository
 {
     public interface IBirthRepository
     {
-
+        // CRUD
         Task<int> Create(Birth birth);
-
         Task<Birth> Get(int id);
         Task<IEnumerable<Birth>> GetAll();
-        Task<(Birth, List<Clinician>)> GetWithClinicians(int id);
-        Task<IEnumerable<Birth>> GetAllWithinTimespan(DateTime startDate, DateTime endDate);
-
-        Task<IEnumerable<(Birth,int,IEnumerable<Clinician>)>> GetAllBirthsWithCliniciansUsingBirthRoomAtTime(DateTime time);
-
         Task<bool> Update(int id, Birth birth);
         Task<bool> Delete(int id);
+
+        // Specific Task Functionality
+        Task<(Birth, List<Clinician>)> GetWithClinicians(int id);
+        Task<IEnumerable<Birth>> GetAllWithinTimespan(DateTime startDate, DateTime endDate);
+        Task<IEnumerable<(Birth, int, IEnumerable<Clinician>)>> GetAllBirthsWithCliniciansUsingBirthRoomAtTime(DateTime time);
         Task<bool> EndBirth(int id);
-
-
     }
 }
