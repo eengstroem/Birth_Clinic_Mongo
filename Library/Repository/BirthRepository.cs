@@ -26,47 +26,28 @@ namespace Library.Repository
             return birth.Id;
         }
 
-        public async Task<bool> Delete(int id)
-        {
-            var res = await _births.DeleteOneAsync(b => b.Id == id);
-            return res.DeletedCount == 1;
-        }
-
-        public Task<bool> EndBirth(ObjectId id)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<Birth> Get(int id)
         {
             return await _births.Find(b => b.Id == id).FirstOrDefaultAsync();
         }
 
-        public async Task<IEnumerable<Birth>> Get()
+        public async Task<IEnumerable<Birth>> GetAll()
         {
             return await _births.Find(_ => true).ToListAsync();
         }
 
-        public Task<IEnumerable<Birth>> GetAll()
+        public Task<(Birth, List<Clinician>)> GetWithClinicians(int id)
         {
             throw new NotImplementedException();
         }
-
-        public Task<IEnumerable<Birth>> GetAllActiveBirths()
-        {
-            throw new NotImplementedException();
-        }
-
         public Task<IEnumerable<Birth>> GetAllWithinTimespan(DateTime startDate, DateTime endDate)
         {
             throw new NotImplementedException();
         }
-
-        public Task<(Birth, List<Clinician>)> GetWithClinicians(ObjectId id)
+        public Task<IEnumerable<(Birth, int, IEnumerable<Clinician>)>> GetAllBirthsWithCliniciansUsingBirthRoomAtTime(DateTime time)
         {
             throw new NotImplementedException();
         }
-
         public async Task<bool> Update(int id, Birth birth)
         {
             var update = Builders<Birth>.Update
@@ -81,6 +62,16 @@ namespace Library.Repository
 
             var res = await _births.UpdateOneAsync(b => b.Id == id, update);
             return res.ModifiedCount == 1;
+        }
+        public async Task<bool> Delete(int id)
+        {
+            var res = await _births.DeleteOneAsync(b => b.Id == id);
+            return res.DeletedCount == 1;
+        }
+
+        public Task<bool> EndBirth(int id)
+        {
+            throw new NotImplementedException();
         }
     }
 }
