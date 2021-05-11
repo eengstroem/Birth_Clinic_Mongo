@@ -2,31 +2,24 @@
 using Library.Models.Rooms;
 using System;
 using System.ComponentModel.DataAnnotations;
+using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson;
 
 namespace Library.Models.Reservations
 {
     public class Reservation
     {
-        [Key]
-        public int ReservationId { get; set; }
+        [BsonRepresentation(BsonType.ObjectId)]
+        public int Id { get; set; }
 
-        [Required]
-        [DataType(DataType.Date)]
+        [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
         public DateTime StartTime { get; set; }
 
-        [Required]
-        [DataType(DataType.Date)]
+        [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
         public DateTime EndTime { get;  set; }
 
-        [Required]
-        public Room ReservedRoom { get;  set; }
+        public int ReservedRoomId { get;  set; }
 
-        [Required]
-        public Birth AssociatedBirth { get;  set; }
-
-        public int? BirthId { get; set; }
-
-        [Required]
         public bool IsEndedEarly { get; set; } = false;
 
     }

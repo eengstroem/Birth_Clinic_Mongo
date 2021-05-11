@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace Library.Models.Clinicians
 {
@@ -15,19 +17,17 @@ namespace Library.Models.Clinicians
     }
     public class Clinician
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int FacultyId { get; set; }
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; }
 
-        [Required]
+
         public string FirstName { get; set; }
 
-        [Required]
+
         public string LastName { get; set; }
 
-        public ICollection<Birth> AssignedBirths { get; set; }
+        public List<ObjectId> AssignedBirthsIds { get; set; }
 
-        [Required]
         public ClinicianType Role { get; set; }
     }
 }

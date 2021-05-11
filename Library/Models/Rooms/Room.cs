@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace Library.Models.Rooms
 {
@@ -14,16 +16,12 @@ namespace Library.Models.Rooms
 
     public class Room
     {
-        // This can also be used as the actual room number.
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int RoomId { get; set; }
+        [BsonRepresentation(BsonType.ObjectId)]
+        public int Id { get; set; }
 
         [Required]
         public RoomType RoomType { get; set; }
 
-        //optional
-        public ICollection<Reservation> CurrentReservations { get; set; }
 
     }
 }

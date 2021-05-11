@@ -15,7 +15,6 @@ namespace Library.Factory.Clinicians
             {
                 FirstName = faker.Name.FirstName(),
                 LastName = faker.Name.LastName(),
-                AssignedBirths = new List<Birth>(),
                 Role = type
             };
             return o;

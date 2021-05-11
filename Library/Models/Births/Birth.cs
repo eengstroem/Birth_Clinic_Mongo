@@ -4,38 +4,34 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Library.Models.Reservations;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace Library.Models.Births
 {
     public class Birth
     {
 
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int BirthId { get; set; }
+        [BsonRepresentation(BsonType.ObjectId)]
+        public int Id { get; set; }
 
-        [Required]
-        [DataType(DataType.Date)]
+        [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
         public DateTime BirthDate { get; set; }
+        
+        public List<string> AssociatedClinicians { get; set; }
 
-        public ICollection<Clinician> AssociatedClinicians { get; set; }
+        public List<Child> ChildrenToBeBorn { get; set; }
 
-        [Required]
-        public ICollection<Child> ChildrenToBeBorn { get; set; }
-
-        [Required]
         public Mother Mother { get; set; }
-        public int MotherForeignKey { get; set; }
 
-        [Required]
         public bool IsEnded { get; set; }
 
-        //optional
         public Father Father { get; set; }
-        public int? FatherForeignKey { get; set; }
 
-        //optional
-        public ICollection<Relative> Relatives { get; set; }
+        public List<Relative> Relatives { get; set; }
+
+        public List<Reservation> Reservations { get; set; }
 
 
     }

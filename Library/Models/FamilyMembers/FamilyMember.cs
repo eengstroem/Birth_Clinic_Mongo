@@ -1,14 +1,15 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace Library.Models.FamilyMembers
 {
 
     public abstract class FamilyMember
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int FamilyMemberId { get; set; }
+        [BsonRepresentation(BsonType.ObjectId)]
+        public int Id { get; set; }
 
         public string FirstName { get; set; }
 

@@ -5,7 +5,5 @@ namespace Library.Models.FamilyMembers
 {
     public class Mother : FamilyMember
     {
-        [Required]
-        public Birth AssociatedBirth { get; set; }
     }
 }
