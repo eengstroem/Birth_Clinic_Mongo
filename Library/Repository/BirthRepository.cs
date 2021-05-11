@@ -126,14 +126,23 @@ namespace Library.Repository
             var reservations = await GetAllReservations();
             IEnumerable<Room> rooms = await RoomRepo.GetAll();
             Room FinalRoom = null;
-
+            if(reservations == null)
+            {
+                foreach(Room room in rooms)
+                {
+                    if(room.RoomType == type)
+                    {
+                        return room;
+                    }
+                }
+            }
             foreach (Reservation r in reservations)
             {
-                if(r.StartTime <= StartTime && r.EndTime <= StartTime || r.EndTime > EndTime && r.StartTime > EndTime)
+                foreach (Room room in rooms)
                 {
-                    foreach(Room room in rooms)
+                    if (r.ReservedRoomId == room.Id && room.RoomType == type)
                     {
-                        if (r.ReservedRoomId == room.Id && room.RoomType == type)
+                        if (r.StartTime <= StartTime && r.EndTime <= StartTime || r.EndTime > EndTime && r.StartTime > EndTime)
                         {
                             FinalRoom = room;
                             break;
