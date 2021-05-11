@@ -20,13 +20,13 @@ namespace Library.Repository
             _births = _client.GetDatabase("BirthClinic").GetCollection<Birth>(nameof(Birth));
         }
 
-        public async Task<ObjectId> Create(Birth birth)
+        public async Task<int> Create(Birth birth)
         {
             await _births.InsertOneAsync(birth);
             return birth.Id;
         }
 
-        public async Task<bool> Delete(ObjectId id)
+        public async Task<bool> Delete(int id)
         {
             var res = await _births.DeleteOneAsync(b => b.Id == id);
             return res.DeletedCount == 1;
@@ -37,7 +37,7 @@ namespace Library.Repository
             throw new NotImplementedException();
         }
 
-        public async Task<Birth> Get(ObjectId id)
+        public async Task<Birth> Get(int id)
         {
             return await _births.Find(b => b.Id == id).FirstOrDefaultAsync();
         }
@@ -67,7 +67,7 @@ namespace Library.Repository
             throw new NotImplementedException();
         }
 
-        public async Task<bool> Update(ObjectId id, Birth birth)
+        public async Task<bool> Update(int id, Birth birth)
         {
             var update = Builders<Birth>.Update
                 .Set(b => b.AssociatedClinicians, birth.AssociatedClinicians)
