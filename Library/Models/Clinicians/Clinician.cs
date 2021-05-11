@@ -18,7 +18,7 @@ namespace Library.Models.Clinicians
     public class Clinician
     {
         [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; }
+        public int Id { get; set; }
 
 
         public string FirstName { get; set; }
@@ -26,7 +26,7 @@ namespace Library.Models.Clinicians
 
         public string LastName { get; set; }
 
-        public List<ObjectId> AssignedBirthsIds { get; set; }
+        public List<int> AssignedBirthsIds { get; set; }
 
         public ClinicianType Role { get; set; }
     }

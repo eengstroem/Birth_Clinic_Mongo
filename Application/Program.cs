@@ -45,7 +45,7 @@ namespace Application
                         Disp.Reset();
                         break;
                     case 'E':
-                        Disp.Case5(Context);
+                        Disp.Case5();
                         Disp.Reset();
                         break;
                     case 'M':

@@ -10,7 +10,12 @@ namespace Library.Repository
 {
     public interface IClinicianRepository
     {
+        Task<Clinician> Get(int id);
+        Task<IEnumerable<Clinician>> GetAll();
         Task<IEnumerable<Clinician>> GetAllMatching(List<string> ids);
 
+        Task<int> Create(Clinician clinician);
+        Task<bool> Update(int id, Clinician clinician);
+        Task<bool> Delete(int id);
     }
 }

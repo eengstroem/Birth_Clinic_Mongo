@@ -17,7 +17,8 @@ namespace Library.Repository
         public BirthRepository(MongoClient client)
         {
             _client = client;
-            _births = _client.GetDatabase("BirthClinic").GetCollection<Birth>(nameof(Birth));
+            _births = _client.GetDatabase("BirthClinic")
+                .GetCollection<Birth>(nameof(Birth));
         }
 
         public async Task<int> Create(Birth birth)
