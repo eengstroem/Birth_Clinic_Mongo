@@ -10,8 +10,7 @@ namespace Library.Repository
 {
     public interface IRoomRepository
     {
-
         Task<IEnumerable<Room>> GetAllMatching(List<int> ids);
-        Task<Dictionary<int,Room>> GetDictionaryOfAllMatching(List<int> ids);
+        Task<Dictionary<int, Room>> GetDictionaryOfAllMatching(List<int> ids);
     }
 }

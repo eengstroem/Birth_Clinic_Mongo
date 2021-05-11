@@ -18,7 +18,7 @@ namespace Library.Models.Births
 
         [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
         public DateTime BirthDate { get; set; }
-        
+
         public List<string> AssociatedClinicians { get; set; }
 
         public List<Child> ChildrenToBeBorn { get; set; }
