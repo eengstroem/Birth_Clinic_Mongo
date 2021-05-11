@@ -26,15 +26,15 @@ namespace Library.Repository
 
         // CRUD
 
-        public async Task<int> Create(Clinician clinician)
+        public async Task<Clinician> Create(Clinician clinician)
         {
             await _clinicians.InsertOneAsync(clinician);
-            return clinician.Id;
+            return clinician;
         }
 
         public async Task<Clinician> Get(int id)
         {
-            return await _clinicians.Find(c => c.Id == id).FirstOrDefaultAsync();
+            return await _clinicians.Find(c => c._id == id).FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<Clinician>> GetAll()
@@ -43,7 +43,7 @@ namespace Library.Repository
         }
         public async Task<IEnumerable<Clinician>> GetAllMatching(List<int> ids)
         {
-            return await _clinicians.Find(c => ids.Contains(c.Id)).ToListAsync();
+            return await _clinicians.Find(c => ids.Contains(c._id)).ToListAsync();
         }
 
         public async Task<bool> Update(int id, Clinician clinician)
@@ -54,13 +54,13 @@ namespace Library.Repository
                 .Set(c => c.FirstName, clinician.FirstName)
                 .Set(c => c.LastName, clinician.LastName);
 
-            var res = await _clinicians.UpdateOneAsync(c => c.Id == id, update);
+            var res = await _clinicians.UpdateOneAsync(c => c._id == id, update);
             return res.ModifiedCount == 1;
         }
 
         public async Task<bool> Delete(int id)
         {
-            var res = await _clinicians.DeleteOneAsync(c => c.Id == id);
+            var res = await _clinicians.DeleteOneAsync(c => c._id == id);
             return res.DeletedCount == 1;
         }
 

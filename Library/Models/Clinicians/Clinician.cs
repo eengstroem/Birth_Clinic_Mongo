@@ -19,7 +19,8 @@ namespace Library.Models.Clinicians
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public int Id { get; set; }
+        [BsonIgnoreIfDefault]
+        public int _id { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public List<int> AssignedBirthsIds { get; set; }

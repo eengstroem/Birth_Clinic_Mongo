@@ -106,7 +106,7 @@ namespace Library.DataGenerator
 
                 foreach(Clinician c in Clinicians)
                 {
-                    B.AssociatedClinicians.Add(c.Id);
+                    B.AssociatedClinicians.Add(c._id);
                 }
                 B.Mother = AddMother();
                 Random rand = new();
