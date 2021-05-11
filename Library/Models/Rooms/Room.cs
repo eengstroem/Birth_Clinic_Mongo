@@ -16,6 +16,7 @@ namespace Library.Models.Rooms
 
     public class Room
     {
+        [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public int Id { get; set; }
 

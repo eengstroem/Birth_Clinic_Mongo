@@ -7,6 +7,7 @@ using MongoDB.Driver;
 using System;
 using Library.Config;
 using Library.Repository;
+using System.Threading;
 
 namespace Application
 {
@@ -19,10 +20,10 @@ namespace Application
             ConfigureServices(Services);
 
             ServiceProvider ServiceProvider = Services.BuildServiceProvider();
-
             //TODO update to use repositories instead
-            DataGenerator.GenerateStaticData(ServiceProvider.GetService<ClinicianRepository>(), ServiceProvider.GetService<RoomRepository>());
-            DataGenerator.GenerateData(ServiceProvider.GetService<ClinicianRepository>(), ServiceProvider.GetService<RoomRepository>(), ServiceProvider.GetService<BirthRepository>());
+            DataGenerator DG = new(ServiceProvider.GetService<BirthRepository>(), ServiceProvider.GetService<ClinicianRepository>(), ServiceProvider.GetService<RoomRepository>());
+            DG.GenerateStaticData();
+            DG.GenerateData();
 
             Display Disp = new(ServiceProvider.GetService<BirthRepository>(), ServiceProvider.GetService<ClinicianRepository>(), ServiceProvider.GetService<RoomRepository>());
 

@@ -19,73 +19,83 @@ namespace Library.DataGenerator
 {
     public class DataGenerator
     {
+        private readonly IBirthRepository birthRepo;
+        private readonly IClinicianRepository clinicianRepo;
+        private readonly IRoomRepository roomRepo;
 
         private static readonly int HowManyBirthsToGenerate = 30;
-        public static async void GenerateStaticData(ClinicianRepository ClinicianRepo, RoomRepository RoomRepo)
+
+        public DataGenerator(IBirthRepository BirthRepo, IClinicianRepository ClinicianRepo, IRoomRepository RoomRepo)
+        {
+            birthRepo = BirthRepo;
+            clinicianRepo = ClinicianRepo;
+            roomRepo = RoomRepo;
+        }
+            public async void GenerateStaticData()
         {
             //create midwives
             for (int i = 0; i < 10; i++)
             {
-                await ClinicianRepo.Create(ClinicianFactory.CreateFakeClinician(ClinicianType.MIDWIFE));
+                await clinicianRepo.Create(ClinicianFactory.CreateFakeClinician(ClinicianType.MIDWIFE));
             }
 
             //create nurses
             for (int i = 0; i < 20; i++)
             {
-                await ClinicianRepo.Create(ClinicianFactory.CreateFakeClinician(ClinicianType.NURSE));
+                await clinicianRepo.Create(ClinicianFactory.CreateFakeClinician(ClinicianType.NURSE));
             }
 
             //create assistants
             for (int i = 0; i < 20; i++)
             {
-                await ClinicianRepo.Create(ClinicianFactory.CreateFakeClinician(ClinicianType.HEALTH_ASSISTANT));
+                await clinicianRepo.Create(ClinicianFactory.CreateFakeClinician(ClinicianType.HEALTH_ASSISTANT));
             }
 
             //create Doctors
             for (int i = 0; i < 5; i++)
             {
-                await ClinicianRepo.Create(ClinicianFactory.CreateFakeClinician(ClinicianType.DOCTOR));
+                await clinicianRepo.Create(ClinicianFactory.CreateFakeClinician(ClinicianType.DOCTOR));
             }
 
             //create Secretaries
             for (int i = 0; i < 4; i++)
             {
-                await ClinicianRepo.Create(ClinicianFactory.CreateFakeClinician(ClinicianType.SECRETARY));
+                await clinicianRepo.Create(ClinicianFactory.CreateFakeClinician(ClinicianType.SECRETARY));
             }
 
             //create Maternity Rooms
             for (int i = 0; i < 22; i++)
             {
-                await RoomRepo.Create(RoomFactory.CreateRoom(RoomType.MATERNITY));
+                await roomRepo.Create(RoomFactory.CreateRoom(RoomType.MATERNITY));
             }
 
             //create Rest Rooms
             for (int i = 0; i < 5; i++)
             {
-                await RoomRepo.Create(RoomFactory.CreateRoom(RoomType.REST));
+                await roomRepo.Create(RoomFactory.CreateRoom(RoomType.REST));
             }
 
             //create Birth Rooms
             for (int i = 0; i < 15; i++)
             {
-                await RoomRepo.Create(RoomFactory.CreateRoom(RoomType.BIRTH));
+                await roomRepo.Create(RoomFactory.CreateRoom(RoomType.BIRTH));
             }
 
         }
 
-        public async static void GenerateData(ClinicianRepository ClinicianRepo, RoomRepository RoomRepo, BirthRepository BirthRepo)
+        public async void GenerateData()
         {
             //Adding 136 Births since there are 5000 births per year (13.6 per day), and we want to simulate 10 days of fake data.
             for (int i = 0; i < HowManyBirthsToGenerate; i++)
             {
                 List<Clinician> Clinicians;
                 var B = BirthFactory.CreateFakeBirth();
-                if (!CreateReservations(RoomRepo, B, out List<Reservation> reservations))
+                if (!CreateReservations(roomRepo, B, out List<Reservation> reservations))
                 {
                     Console.WriteLine("We are out of rooms");
                     continue;
                 }
-                Clinicians = await AddClinicians(ClinicianRepo, B);
+                Clinicians = await AddClinicians(clinicianRepo, B);
                 if (Clinicians == null)
                 {
 
@@ -110,12 +120,12 @@ namespace Library.DataGenerator
 
                 B.IsEnded = false;
 
-                await BirthRepo.Create(B);
+                await birthRepo.Create(B);
             }
         }
 
         //TODO switch to single instead of where
-        public static async Task<Room> FindAvailableRooms(RoomRepository RoomRepo, DateTime StartTime, DateTime EndTime, RoomType Type)
+        public static async Task<Room> FindAvailableRooms(IRoomRepository RoomRepo, DateTime StartTime, DateTime EndTime, RoomType Type)
         {
             try
             {
@@ -127,7 +137,7 @@ namespace Library.DataGenerator
             }
         }
 
-        public async static Task<IEnumerable<Clinician>> FindAvailableClinicians(ClinicianRepository ClinicianRepo, Birth Birth, ClinicianType Role)
+        public async static Task<IEnumerable<Clinician>> FindAvailableClinicians(IClinicianRepository ClinicianRepo, Birth Birth, ClinicianType Role)
         {
             int RequiredDelta = 0;
             int AllowedOccurences = 0;
@@ -165,7 +175,7 @@ namespace Library.DataGenerator
 
         }
 
-        public static bool CreateReservations(RoomRepository RoomRepo, Birth Birth, out List<Reservation> reservations)
+        public static bool CreateReservations(IRoomRepository RoomRepo, Birth Birth, out List<Reservation> reservations)
         {
             var MaternityStartTime = Birth.BirthDate.AddHours(-132);
             var MaternityEndTime = Birth.BirthDate.AddHours(-12);
@@ -215,7 +225,7 @@ namespace Library.DataGenerator
             }
         }
 
-        public async static Task<List<Clinician>> AddClinicians(ClinicianRepository ClinicianRepo, Birth Birth)
+        public async static Task<List<Clinician>> AddClinicians(IClinicianRepository ClinicianRepo, Birth Birth)
         {
             List<Clinician> Clinicians;
             Random Rand = new();

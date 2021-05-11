@@ -20,5 +20,6 @@ namespace Library.Repository
         // Specific Task Functionality
         Task<IEnumerable<Room>> GetAllMatching(List<int> ids);
         Task<Dictionary<int, Room>> GetDictionaryOfAllMatching(List<int> ids);
+        Task<Room> GetUnreservedRoomOfType(DateTime StartTime, DateTime EndTime, RoomType Type);
     }
 }

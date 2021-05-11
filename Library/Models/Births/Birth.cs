@@ -13,6 +13,7 @@ namespace Library.Models.Births
     public class Birth
     {
 
+        [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public int Id { get; set; }
 

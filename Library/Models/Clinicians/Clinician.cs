@@ -17,6 +17,7 @@ namespace Library.Models.Clinicians
     }
     public class Clinician
     {
+        [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public int Id { get; set; }
         public string FirstName { get; set; }

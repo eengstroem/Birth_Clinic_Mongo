@@ -17,11 +17,6 @@ namespace Library.Repository
         private readonly MongoClient _client;
         private readonly IMongoCollection<Clinician> _clinicians;
 
-        public ClinicianRepository(IMongoCollection<Clinician> clinicians)
-        {
-            _clinicians = clinicians;
-        }
-
         public ClinicianRepository(MongoClient client)
         {
             _client = client;
