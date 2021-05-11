@@ -1,5 +1,4 @@
-﻿using Library.Context;
-using Library.DataGenerator;
+﻿using Library.DataGenerator;
 using Library.Display;
 using Library.Models.Rooms;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +12,7 @@ namespace Application
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             ServiceCollection Services = new();
 
@@ -22,38 +21,38 @@ namespace Application
             ServiceProvider ServiceProvider = Services.BuildServiceProvider();
 
             //TODO update to use repositories instead
-            DataGenerator.GenerateStaticData(Context);
-            DataGenerator.GenerateData(Context);
+            DataGenerator.GenerateStaticData(ServiceProvider.GetService<ClinicianRepository>(), ServiceProvider.GetService<RoomRepository>());
+            DataGenerator.GenerateData(ServiceProvider.GetService<ClinicianRepository>(), ServiceProvider.GetService<RoomRepository>(), ServiceProvider.GetService<BirthRepository>());
 
-            Display Disp = new();
+            Display Disp = new(ServiceProvider.GetService<BirthRepository>(), ServiceProvider.GetService<ClinicianRepository>(), ServiceProvider.GetService<RoomRepository>());
 
 
             while (true)
             {
                 
-                Char Input = Disp.ReadSingleCharFromDisplay();
+                Char Input = Display.ReadSingleCharFromDisplay();
 
                 //TODO switch to repositories
                 switch (Input)
                 {
                     case 'A':
-                        Disp.Case1(Context);
-                        Disp.Reset();
+                        Disp.Case1();
+                        Display.Reset();
                         break;
                     case 'C':
-                        Disp.Case3(Context);
-                        Disp.Reset();
+                        Disp.Case3();
+                        Display.Reset();
                         break;
                     case 'E':
                         Disp.Case5();
-                        Disp.Reset();
+                        Display.Reset();
                         break;
                     case 'M':
-                        Disp.MarioFunny();
-                        Disp.ForceReset("");
+                        Display.MarioFunny();
+                        Display.ForceReset("");
                         break;
                     default:
-                        Disp.ForceReset("Unacceptable input");
+                        Display.ForceReset("Unacceptable input");
                         break;
                 }
             }

@@ -14,8 +14,13 @@ namespace Library.Repository
     {
         // Initialization
 
-        private MongoClient _client;
-        private IMongoCollection<Clinician> _clinicians;
+        private readonly MongoClient _client;
+        private readonly IMongoCollection<Clinician> _clinicians;
+
+        public ClinicianRepository(IMongoCollection<Clinician> clinicians)
+        {
+            _clinicians = clinicians;
+        }
 
         public ClinicianRepository(MongoClient client)
         {
@@ -41,9 +46,9 @@ namespace Library.Repository
         {
             return await _clinicians.Find(_ => true).ToListAsync();
         }
-        public Task<IEnumerable<Clinician>> GetAllMatching(List<string> ids)
+        public async Task<IEnumerable<Clinician>> GetAllMatching(List<int> ids)
         {
-            throw new NotImplementedException();
+            return await _clinicians.Find(c => ids.Contains(c.Id)).ToListAsync();
         }
 
         public async Task<bool> Update(int id, Clinician clinician)
@@ -62,6 +67,33 @@ namespace Library.Repository
         {
             var res = await _clinicians.DeleteOneAsync(c => c.Id == id);
             return res.DeletedCount == 1;
+        }
+
+        public async Task<List<Clinician>> FindAvailableClinicians(ClinicianType role,Birth birth, int RequiredDelta, int AllowedOccurences)
+        {
+            var _births = _client.GetDatabase("BirthClinic").GetCollection<Birth>(nameof(Birth));
+            var clinicians = await _clinicians.Find(c =>c.Role == role).ToListAsync();
+
+            var births = await _births.Find(_=>true).ToListAsync();
+
+            List<Clinician> availableClinicians = new();
+
+            foreach(Birth b in births)
+            {
+                foreach(Clinician c in clinicians)
+                {
+                    if (!c.AssignedBirthsIds.Contains(b.Id))
+                    {
+                        break;
+                    }
+                    if (((birth.BirthDate - b.BirthDate).TotalDays - (birth.BirthDate - b.BirthDate).Days)*60  >= RequiredDelta * 60)
+                    {
+                        availableClinicians.Add(c);
+                    }
+                }
+            }
+
+            return availableClinicians;
         }
     }
 }

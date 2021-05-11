@@ -1,4 +1,6 @@
-﻿using Library.Models.Rooms;
+﻿using Library.Models.Births;
+using Library.Models.Reservations;
+using Library.Models.Rooms;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -12,8 +14,8 @@ namespace Library.Repository
     {
         // Initialization
 
-        private MongoClient _client;
-        private IMongoCollection<Room> _rooms;
+        private readonly MongoClient _client;
+        private readonly IMongoCollection<Room> _rooms;
 
         public RoomRepository(MongoClient client)
         {
@@ -62,6 +64,35 @@ namespace Library.Repository
         public Task<Dictionary<int, Room>> GetDictionaryOfAllMatching(List<int> ids)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<Room> GetUnreservedRoomOfType(DateTime StartTime, DateTime EndTime, RoomType Type)
+        {
+            var _births = _client.GetDatabase("BirthClinic").GetCollection<Birth>(nameof(Birth));
+            var rooms = await _rooms.Find(r => r.RoomType == Type).ToListAsync();
+            var births = await _births.Find(_ => true).ToListAsync();
+
+            if(births == null)
+            {
+                return rooms.ElementAt(0);
+            }
+            foreach (Room r in rooms)
+            {
+                foreach(Birth b in births)
+                {
+                    foreach(Reservation res in b.Reservations)
+                    {
+                        if(r.ReservationIds.Contains(res.Id))
+                        {
+                            if(res.EndTime < StartTime && res.StartTime < StartTime || res.StartTime > EndTime && res.EndTime > EndTime)
+                            {
+                                return r;
+                            }
+                        }
+                    }
+                }
+            }
+            return null;
         }
 
     }

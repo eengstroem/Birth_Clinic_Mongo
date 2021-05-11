@@ -17,8 +17,8 @@ namespace Library.Repository
 
         // Initialization
 
-        private MongoClient _client;
-        private IMongoCollection<Birth> _births;
+        private readonly MongoClient _client;
+        private readonly IMongoCollection<Birth> _births;
         public BirthRepository(MongoClient client)
         {
             _client = client;
@@ -105,52 +105,6 @@ namespace Library.Repository
             }
             return result;
 
-        }
-        public async Task<IEnumerable<Reservation>> GetAllReservations()
-        {
-            var births = await GetAll();
-            List<Reservation> reservations = null;
-            foreach(Birth b in births)
-            {
-                foreach(Reservation r in b.Reservations)
-                {
-                    reservations.Add(r);
-                }
-            }
-
-            return reservations;
-        }
-
-        public async Task<Room> GetFirstRoomOfTypeOutsideOfTimeSlot(DateTime StartTime, DateTime EndTime,RoomType type,RoomRepository RoomRepo)
-        {
-            var reservations = await GetAllReservations();
-            IEnumerable<Room> rooms = await RoomRepo.GetAll();
-            Room FinalRoom = null;
-            if(reservations == null)
-            {
-                foreach(Room room in rooms)
-                {
-                    if(room.RoomType == type)
-                    {
-                        return room;
-                    }
-                }
-            }
-            foreach (Reservation r in reservations)
-            {
-                foreach (Room room in rooms)
-                {
-                    if (r.ReservedRoomId == room.Id && room.RoomType == type)
-                    {
-                        if (r.StartTime <= StartTime && r.EndTime <= StartTime || r.EndTime > EndTime && r.StartTime > EndTime)
-                        {
-                            FinalRoom = room;
-                            break;
-                        }
-                    }
-                }
-            }
-            return FinalRoom;
         }
 
         public async Task<bool> EndBirth(int id)

@@ -16,8 +16,15 @@ namespace Library.Display
     public class Display
     {
 
-        public Display()
+        private readonly IBirthRepository birthRepo;
+        private readonly IClinicianRepository clinicianRepo;
+        private readonly IRoomRepository roomRepo;
+
+        public Display(IBirthRepository BirthRepo, IClinicianRepository ClinicianRepo, IRoomRepository RoomRepo)
         {
+            birthRepo = BirthRepo;
+            clinicianRepo = ClinicianRepo;
+            roomRepo = RoomRepo;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
 
@@ -70,7 +77,7 @@ namespace Library.Display
             Console.WriteLine("C: Specific information about a specific planned birth");
         }
 
-        public void Reset()
+        public static void Reset()
         {
             Console.WriteLine("\nOnce you finish reading, please press the escape key to return to the main menu.");
 
@@ -92,7 +99,7 @@ namespace Library.Display
 
         }
 
-        public void ForceReset(string errorMessage)
+        public static void ForceReset(string errorMessage)
         {
             Console.Clear();
             Console.WriteLine(errorMessage);
@@ -136,7 +143,7 @@ namespace Library.Display
             }
             return Choice;
         }
-        public char ReadSingleCharFromDisplay()
+        public static char ReadSingleCharFromDisplay()
         {
             char line = ' ';
             while (line == ' ')
@@ -154,7 +161,7 @@ namespace Library.Display
             }
             return line;
         }
-        public void MarioFunny()
+        public static void MarioFunny()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -180,7 +187,7 @@ namespace Library.Display
             }
         }
 
-        public void Case1(IBirthRepository birthRepo, IClinicianRepository clinicianRepo, IRoomRepository roomRepo)
+        public void Case1()
         {
             Console.Clear();
 
@@ -250,7 +257,7 @@ namespace Library.Display
             }
         }
 
-        public void Case3(IBirthRepository birthRepo, IClinicianRepository clinicianRepo)
+        public void Case3()
         {
             Console.Clear();
             DateTime FilterDate = DateTime.Now;
@@ -267,7 +274,6 @@ namespace Library.Display
 
             if (!BirthsWithRoomNumber.Any())
             {
-                return (element1, element2, element3);
                 Console.WriteLine("There are currently no ongoing births.");
                 return;
             }
@@ -302,7 +308,7 @@ namespace Library.Display
 
             }
         }
-        public void Case5(IBirthRepository birthRepo, IClinicianRepository clinicianRepo, IRoomRepository roomRepo)
+        public void Case5()
         {
             Console.Clear();
             var births = birthRepo.GetAll().Result;
