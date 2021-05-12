@@ -70,7 +70,7 @@ namespace Library.Display
 
             Console.WriteLine("Hello, please type the corresponding letter to choose one of the following options:");
             Console.WriteLine("A: Show planned births for the coming three days");
-            Console.WriteLine("birth: Show the current ongoing births with information about the birth, parents, clinicians associated and the birth room.");
+            Console.WriteLine("B: Show the current ongoing births with information about the birth, parents, clinicians associated and the birth room.");
             Console.WriteLine("C: Specific information about a specific planned birth");
         }
 
@@ -87,12 +87,8 @@ namespace Library.Display
             Console.Write("A");
             Console.WriteLine("Hello, please type the corresponding letter to choose one of the following options:");
             Console.WriteLine("A: Show planned births for the coming three days");
-            Console.WriteLine("birth: Show clinicians, birth rooms, maternity rooms and rest rooms available at the clinic for the next five days");
-            Console.WriteLine("C: Show the current ongoing births with information about the birth, parents, clinicians associated and the birth room.");
-            Console.WriteLine("D: Show the maternity rooms and the rest rooms in use with the parent(s) and child(ren) using the room.");
-            Console.WriteLine("E: Specific information about a specific planned birth");
-            Console.WriteLine("F: Creation Section");
-            Console.WriteLine("H: Removal Section");
+            Console.WriteLine("B: Show the current ongoing births with information about the birth, parents, clinicians associated and the birth room.");
+            Console.WriteLine("C: Specific information about a specific planned birth");
 
         }
 
@@ -104,12 +100,8 @@ namespace Library.Display
             Console.Clear();
             Console.WriteLine("Hello, please type the corresponding letter to choose one of the following options:");
             Console.WriteLine("A: Show planned births for the coming three days");
-            Console.WriteLine("birth: Show clinicians, birth rooms, maternity rooms and rest rooms available at the clinic for the next five days");
-            Console.WriteLine("C: Show the current ongoing births with information about the birth, parents, clinicians associated and the birth room.");
-            Console.WriteLine("D: Show the maternity rooms and the rest rooms in use with the parent(s) and child(ren) using the room.");
-            Console.WriteLine("E: Specific information about a specific planned birth");
-            Console.WriteLine("F: Creation Section");
-            Console.WriteLine("H: Removal Section");
+            Console.WriteLine("B: Show the current ongoing births with information about the birth, parents, clinicians associated and the birth room.");
+            Console.WriteLine("C: Specific information about a specific planned birth");
 
         }
         public static void ClearCurrentConsoleLine()
@@ -122,14 +114,14 @@ namespace Library.Display
 
         public static int ReadAndParseInt32FromDisplay()
         {
-            string line = "";
-            int Choice = -1;
+            var line = "";
+            var Choice = -1;
             while (Choice == -1)
             {
                 try
                 {
                     line = Console.ReadLine();
-                    Choice = Int32.Parse(line);
+                    Choice = int.Parse(line);
                 }
                 catch (FormatException)
                 {
@@ -189,7 +181,7 @@ namespace Library.Display
             Console.Clear();
 
             //get all births in the next 3 days
-            var BirthList = BirthService.GetAllWithinTimespan(DateTime.Now, DateTime.Now.AddDays(3)).Result;
+            var BirthList = BirthService.GetAllWithinTimespan(DateTime.Now, DateTime.Now.AddDays(3));
 
 
             //select a birth to display further data of
@@ -249,7 +241,6 @@ namespace Library.Display
             }
         }
 
-
         public void Case3()
         {
             Console.Clear();
@@ -262,7 +253,7 @@ namespace Library.Display
             &&
             r.EndTime > FilterDate).ToList();*/
 
-            var births = BirthService.GetAllBirthsUsingABirthRoomAtTime(FilterDate).Result;
+            var births = BirthService.GetAllBirthsUsingABirthRoomAtTime(FilterDate);
 
             if (!births.Any())
             {
@@ -308,7 +299,7 @@ namespace Library.Display
         public void Case5()
         {
             Console.Clear();
-            var births = BirthService.GetAll().Result;
+            var births = BirthService.GetAll();
 
             foreach (var b in births)
             {

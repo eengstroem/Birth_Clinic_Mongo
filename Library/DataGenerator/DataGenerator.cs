@@ -8,7 +8,6 @@ using Library.Models.FamilyMembers;
 using Library.Models.Reservations;
 using Library.Models.Rooms;
 using Library.Repository;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,7 +30,8 @@ namespace Library.DataGenerator
             _clinicianRepo = clinicianRepo;
             _roomRepo = roomRepo;
         }
-        public async void GenerateStaticData()
+        public async Task
+GenerateStaticData()
         {
             //create midwives
             for (int i = 0; i < 10; i++)
@@ -83,26 +83,25 @@ namespace Library.DataGenerator
 
         }
 
-        public async void GenerateData()
+        public async Task GenerateData()
         {
 
             for (var i = 0; i < HowManyBirthsToGenerate; i++)
             {
                 var B = BirthFactory.CreateFakeBirth();
-                if (!CreateReservations(_roomRepo, B, out List<Reservation> reservations))
+                if (!CreateReservations(_roomRepo, B, out var reservations))
                 {
                     Console.WriteLine("We are out of rooms");
                     continue;
                 }
-                var Clinicians = await AddClinicians(_clinicianRepo);
+                var Clinicians = AddClinicians(_clinicianRepo);
                 if (Clinicians == null)
                 {
 
                     continue;
                 }
 
-                B.Reservations.AddRange(reservations);
-
+                B.Reservations = reservations;
                 B.AssociatedClinicians = Clinicians;
                 B.Mother = AddMother();
                 Random rand = new();
@@ -121,17 +120,17 @@ namespace Library.DataGenerator
         }
 
         //TODO switch to single instead of where
-        public static async Task<Room> FindAvailableRooms(IRoomRepository RoomRepo, RoomType type)
+        public static Room FindAvailableRooms(IRoomRepository roomRepo, RoomType type)
         {
-            var rooms = await RoomRepo.GetAll().Where(r => r.RoomType == type).ToListAsync();
+            var rooms = roomRepo.GetAll().Where(r => r.RoomType == type).ToList();
             var random = new Random();
             int index = random.Next(rooms.Count);
             return rooms[index];
         }
 
-        public static async Task<List<Clinician>> FindAvailableClinicians(IClinicianRepository clinicianRepo, ClinicianType role)
+        public static List<Clinician> FindAvailableClinicians(IClinicianRepository clinicianRepo, ClinicianType role)
         {
-            return await clinicianRepo.GetAll().Where(c => c.Role == role).ToListAsync();
+            return clinicianRepo.GetAll().Where(c => c.Role == role).ToList();
 
         }
 
@@ -146,9 +145,9 @@ namespace Library.DataGenerator
             var BirthStartTime = Birth.BirthDate.AddHours(-12);
             var BirthEndTime = Birth.BirthDate;
 
-            var AvailableMaternityRoom = FindAvailableRooms(RoomRepo, RoomType.MATERNITY).Result;
-            var AvailableBirthRoom = FindAvailableRooms(RoomRepo, RoomType.BIRTH).Result;
-            var AvailableRestRoom = FindAvailableRooms(RoomRepo, RoomType.REST).Result;
+            var AvailableMaternityRoom = FindAvailableRooms(RoomRepo, RoomType.MATERNITY);
+            var AvailableBirthRoom = FindAvailableRooms(RoomRepo, RoomType.BIRTH);
+            var AvailableRestRoom = FindAvailableRooms(RoomRepo, RoomType.REST);
 
             //Not possible to create a birth at the given time. Find another  hospital.
             if (AvailableBirthRoom == null || AvailableMaternityRoom == null || AvailableRestRoom == null)
@@ -185,13 +184,13 @@ namespace Library.DataGenerator
             }
         }
 
-        public static async Task<List<Clinician>> AddClinicians(IClinicianRepository clinicianRepo)
+        public static List<Clinician> AddClinicians(IClinicianRepository clinicianRepo)
         {
             List<Clinician> Clinicians = new();
             Random Rand = new();
 
             // Finds available Doctor and inserts one random available Doctor into output List.
-            var Doctors = FindAvailableClinicians(clinicianRepo, ClinicianType.DOCTOR).Result;
+            var Doctors = FindAvailableClinicians(clinicianRepo, ClinicianType.DOCTOR);
             if (!Doctors.Any())
             {
 
@@ -202,7 +201,7 @@ namespace Library.DataGenerator
 
 
             // Finds available Midwife and inserts one random available Midwife into output List.
-            var Midwives = await FindAvailableClinicians(clinicianRepo, ClinicianType.MIDWIFE);
+            var Midwives = FindAvailableClinicians(clinicianRepo, ClinicianType.MIDWIFE);
             if (!Midwives.Any())
             {
                 Console.WriteLine("We are out of Midwives");
@@ -212,7 +211,7 @@ namespace Library.DataGenerator
 
 
             // Finds available Nurse and inserts two random available Nurse into output List.
-            var Nurses = await FindAvailableClinicians(clinicianRepo, ClinicianType.NURSE);
+            var Nurses = FindAvailableClinicians(clinicianRepo, ClinicianType.NURSE);
 
             if (Nurses.Count < 2)
             {
@@ -226,7 +225,7 @@ namespace Library.DataGenerator
 
 
             // Finds available Assistant and inserts two random available Assistant into output List.
-            var Assistants = await FindAvailableClinicians(clinicianRepo, ClinicianType.HEALTH_ASSISTANT);
+            var Assistants = FindAvailableClinicians(clinicianRepo, ClinicianType.HEALTH_ASSISTANT);
             if (!Assistants.Any())
             {
                 Console.WriteLine("We are out of Health Assistants");
@@ -236,7 +235,7 @@ namespace Library.DataGenerator
 
 
             // Finds available Secretary and inserts two random available Secretary into output List.
-            var Secretaries = await FindAvailableClinicians(clinicianRepo, ClinicianType.SECRETARY);
+            var Secretaries = FindAvailableClinicians(clinicianRepo, ClinicianType.SECRETARY);
             if (!Secretaries.Any())
             {
                 Console.WriteLine("We are out of Secretaries");

@@ -23,6 +23,7 @@ namespace Library.Repository
         public BirthRepository(MongoClient client)
         {
             _client = client;
+            _client.GetDatabase("BirthClinic").DropCollection(nameof(Birth));
             _births = _client.GetDatabase("BirthClinic")
                 .GetCollection<Birth>(nameof(Birth));
         }

@@ -10,8 +10,8 @@ namespace Library.Services
 {
     public interface IBirthService
     {
-        Task<IEnumerable<Birth>> GetAllWithinTimespan(DateTime startDate, DateTime endDate);
-        Task<IEnumerable<Birth>>  GetAllBirthsUsingABirthRoomAtTime(DateTime time);
-        Task<IEnumerable<Birth>> GetAll();
+        IEnumerable<Birth> GetAllWithinTimespan(DateTime startDate, DateTime endDate);
+        IEnumerable<Birth> GetAllBirthsUsingABirthRoomAtTime(DateTime time);
+        IEnumerable<Birth> GetAll();
     }
 }

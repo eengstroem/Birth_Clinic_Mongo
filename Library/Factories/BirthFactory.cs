@@ -1,6 +1,9 @@
 ﻿using Bogus;
 using Library.Models.Births;
 using System;
+using System.Collections.Generic;
+using Library.Models.Clinicians;
+using Library.Models.Reservations;
 
 namespace Library.Factory.Births
 {
@@ -12,7 +15,9 @@ namespace Library.Factory.Births
             var faker = new Faker("en");
             var o = new Birth()
             {
-                BirthDate = faker.Date.Between(DateTime.Now, DateTime.Now.AddDays(10)),                
+                BirthDate = faker.Date.Between(DateTime.Now, DateTime.Now.AddDays(10)), 
+                Reservations = new List<Reservation>(),
+                AssociatedClinicians = new List<Clinician>(),
             };
             return o;
         }

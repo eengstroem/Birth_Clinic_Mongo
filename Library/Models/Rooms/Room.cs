@@ -23,7 +23,5 @@ namespace Library.Models.Rooms
         [Required]
         public RoomType RoomType { get; set; }
 
-        public List<string> ReservationIds { get; set; }
-
     }
 }

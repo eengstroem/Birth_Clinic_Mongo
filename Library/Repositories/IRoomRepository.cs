@@ -13,7 +13,7 @@ namespace Library.Repository
         // CRUD
         Task<Room> Get(string id);
         IQueryable<Room> GetAll();
-        Task<string> Create(Room clinician);
+        Task<Room> Create(Room clinician);
         Task<bool> Update(string id, Room clinician);
         Task<bool> Delete(string id);
     }

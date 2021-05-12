@@ -21,6 +21,8 @@ namespace Library.Repository
         public ClinicianRepository(MongoClient client)
         {
             _client = client;
+
+            _client.GetDatabase("BirthClinic").DropCollection(nameof(Clinician));
             _clinicians = _client.GetDatabase("BirthClinic")
                 .GetCollection<Clinician>(nameof(Clinician));
         }

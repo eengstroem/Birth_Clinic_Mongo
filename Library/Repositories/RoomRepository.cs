@@ -20,14 +20,17 @@ namespace Library.Repository
         public RoomRepository(MongoClient client)
         {
             _client = client;
+
+            _client.GetDatabase("BirthClinic").DropCollection(nameof(Room));
             _rooms = _client.GetDatabase("BirthClinic")
                 .GetCollection<Room>(nameof(Room));
         }
         // CRUD
-        public async Task<string> Create(Room room)
+        public async Task<Room> Create(Room room)
         {
             await _rooms.InsertOneAsync(room);
-            return room.Id;
+            
+            return room;
         }
 
         public async Task<Room> Get(string id)
@@ -66,35 +69,6 @@ namespace Library.Repository
         {
             throw new NotImplementedException();
         }
-
-        public async Task<Room> GetUnreservedRoomOfType(DateTime StartTime, DateTime EndTime, RoomType Type)
-        {
-            var _births = _client.GetDatabase("BirthClinic").GetCollection<Birth>(nameof(Birth));
-            var rooms = await _rooms.Find(r => r.RoomType == Type).ToListAsync();
-            var births = await _births.Find(_ => true).ToListAsync();
-
-            if(births == null)
-            {
-                return rooms.ElementAt(0);
-            }
-            foreach (Room r in rooms)
-            {
-                foreach(Birth b in births)
-                {
-                    foreach(Reservation res in b.Reservations)
-                    {
-                        if(r.ReservationIds.Contains(res.Id))
-                        {
-                            if(res.EndTime < StartTime && res.StartTime < StartTime || res.StartTime > EndTime && res.EndTime > EndTime)
-                            {
-                                return r;
-                            }
-                        }
-                    }
-                }
-            }
-            return null;
-        }
-
+        
     }
 }

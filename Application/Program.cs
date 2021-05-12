@@ -8,13 +8,14 @@ using System;
 using Library.Config;
 using Library.Repository;
 using System.Threading;
+using System.Threading.Tasks;
 using Library.Services;
 
 namespace Application
 {
     class Program
     {
-        static void Main()
+        static async Task Main()
         {
             ServiceCollection Services = new();
 
@@ -22,9 +23,9 @@ namespace Application
 
             ServiceProvider ServiceProvider = Services.BuildServiceProvider();
             //TODO update to use repositories instead
-            DataGenerator DG = new(ServiceProvider.GetService<IBirthRepository>(), ServiceProvider.GetService<IClinicianRepository>(), ServiceProvider.GetService<IRoomRepository>());
-            DG.GenerateStaticData();
-            DG.GenerateData();
+            DataGenerator Dg = new(ServiceProvider.GetService<IBirthRepository>(), ServiceProvider.GetService<IClinicianRepository>(), ServiceProvider.GetService<IRoomRepository>());
+            await Dg.GenerateStaticData();
+            await Dg.GenerateData();
 
             Display Disp = new(ServiceProvider.GetService<IBirthService>());
 
@@ -41,11 +42,11 @@ namespace Application
                         Disp.Case1();
                         Display.Reset();
                         break;
-                    case 'C':
+                    case 'B':
                         Disp.Case3();
                         Display.Reset();
                         break;
-                    case 'E':
+                    case 'C':
                         Disp.Case5();
                         Display.Reset();
                         break;
@@ -62,14 +63,15 @@ namespace Application
 
         }
 
-        public static void ConfigureServices(ServiceCollection SC)
+        public static void ConfigureServices(ServiceCollection sc)
         {
 
             var MongoConn = new MongoConnection("mongodb://localhost:27017");
-            SC.AddSingleton(new MongoClient(MongoConn.ConnString));
-            SC.AddSingleton<IBirthRepository, BirthRepository>();
-            SC.AddSingleton<IClinicianRepository, ClinicianRepository>();
-            SC.AddSingleton<IRoomRepository, RoomRepository>();
+            sc.AddSingleton(new MongoClient(MongoConn.ConnString));
+            sc.AddSingleton<IBirthRepository, BirthRepository>();
+            sc.AddSingleton<IClinicianRepository, ClinicianRepository>();
+            sc.AddSingleton<IRoomRepository, RoomRepository>();
+            sc.AddSingleton<IBirthService, BirthService>();
         }
     }
 }
