@@ -2,7 +2,7 @@
 # Birth_Clinic_Mongo
 a project for DAB
 =======
-# Birth_Clinic
+# Birth_Clinic_Mongo
 
 The project is a C# Console Application, using a class library that holds all the logic required for the project.
 Made for the DAB course by Jakob, Marius and Emil.
@@ -27,13 +27,4 @@ Please note that dummy data is generated at runtime.
 This can result in some births not being planned within the next 5 days, as the birthdays are generated randomly.
 If this happens, delete the database and run the program again.
 
-We have made a simple command that drops the entire database for you.
-Use this command to do it quick-and-easy:  
-<code>USE master;
-GO  
-ALTER DATABASE myDb  
-SET SINGLE_USER  
-WITH ROLLBACK IMMEDIATE;  
-GO  
-DROP DATABASE myDb;</code>
->>>>>>> master
+
