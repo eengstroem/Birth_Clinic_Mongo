@@ -1,16 +1,10 @@
 ﻿using Library.Models.Births;
-using Library.Models.FamilyMembers;
-using Library.Models.Reservations;
 using Library.Models.Rooms;
-using Library.Repository;
+using Library.Services;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
-using Library.Models.Clinicians;
-using Library.Services;
-using MongoDB.Bson;
 
 namespace Library.Display
 {
@@ -69,9 +63,9 @@ namespace Library.Display
             }
 
             Console.WriteLine("Hello, please type the corresponding letter to choose one of the following options:");
-            Console.WriteLine("A: Show planned births for the coming three days");
+            Console.WriteLine("A: Show planned births for the coming three days.");
             Console.WriteLine("B: Show the current ongoing births with information about the birth, parents, clinicians associated and the birth room.");
-            Console.WriteLine("C: Specific information about a specific planned birth");
+            Console.WriteLine("C: Specific information about a specific planned birth.");
         }
 
         public static void Reset()
@@ -86,9 +80,9 @@ namespace Library.Display
             Console.Clear();
             Console.Write("A");
             Console.WriteLine("Hello, please type the corresponding letter to choose one of the following options:");
-            Console.WriteLine("A: Show planned births for the coming three days");
+            Console.WriteLine("A: Show planned births for the coming three days.");
             Console.WriteLine("B: Show the current ongoing births with information about the birth, parents, clinicians associated and the birth room.");
-            Console.WriteLine("C: Specific information about a specific planned birth");
+            Console.WriteLine("C: Specific information about a specific planned birth.");
 
         }
 
@@ -99,9 +93,9 @@ namespace Library.Display
             Thread.Sleep(1000);
             Console.Clear();
             Console.WriteLine("Hello, please type the corresponding letter to choose one of the following options:");
-            Console.WriteLine("A: Show planned births for the coming three days");
+            Console.WriteLine("A: Show planned births for the coming three days.");
             Console.WriteLine("B: Show the current ongoing births with information about the birth, parents, clinicians associated and the birth room.");
-            Console.WriteLine("C: Specific information about a specific planned birth");
+            Console.WriteLine("C: Specific information about a specific planned birth.");
 
         }
         public static void ClearCurrentConsoleLine()
@@ -296,27 +290,37 @@ namespace Library.Display
 
             }
         }
-        public void Case5()
+        public bool Case5()
         {
             Console.Clear();
             var births = BirthService.GetAll();
-
+            var i = 1;
             foreach (var b in births)
             {
-                Console.WriteLine("Journal for " + b.Mother.FirstName + "'s Planned birth - " + b.Id);
+                Console.WriteLine("Journal for " + b.Mother.FirstName + "'s Planned birth - " + i);
+                i++;
             }
 
             Console.WriteLine("Please enter a number according to the Journal you wish to read.");
             var Choice = ReadAndParseInt32FromDisplay();
-
+            Birth B = null;
             //Select particular birth
-            var B = births.ElementAt(Choice - 1);
+            try
+            {
+                B = births.ElementAt(Choice - 1);
+            }
+            catch
+            {
+                ForceReset("Invalid Journal choice!");
+                return false;
+            }
 
             Console.Clear();
 
             //presentation logic 
 
             DisplayBirthInfo(B);
+            return true;
         }
     }
 }

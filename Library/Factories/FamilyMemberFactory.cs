@@ -38,7 +38,7 @@ namespace Library.Factory.FamilyMembers
                         FirstName = faker.Name.FirstName(),
                         LastName = faker.Name.LastName()
                     };
-                    return child; 
+                    return child;
                 case FamilyMemberType.RELATIVE:
                     var relative = new Relative
                     {

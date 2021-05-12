@@ -1,13 +1,9 @@
-﻿using System;
+﻿using Library.Models.Clinicians;
+using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using MongoDB.Driver;
-using Library.Models.Clinicians;
-using Library.Models.Births;
-using MongoDB.Bson;
-using MongoDB.Driver.Linq;
 
 namespace Library.Repository
 {
@@ -67,6 +63,6 @@ namespace Library.Repository
             return res.DeletedCount == 1;
         }
 
- 
+
     }
 }

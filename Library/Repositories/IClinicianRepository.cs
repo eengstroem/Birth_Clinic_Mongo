@@ -1,11 +1,7 @@
-﻿using System;
+﻿using Library.Models.Clinicians;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Library.Models.Births;
-using Library.Models.Clinicians;
-using MongoDB.Bson;
 
 namespace Library.Repository
 {
@@ -19,6 +15,6 @@ namespace Library.Repository
         Task<bool> Update(string id, Clinician clinician);
         Task<bool> Delete(string id);
 
-       
+
     }
 }

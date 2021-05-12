@@ -30,8 +30,7 @@ namespace Library.DataGenerator
             _clinicianRepo = clinicianRepo;
             _roomRepo = roomRepo;
         }
-        public async Task
-GenerateStaticData()
+        public async Task GenerateStaticData()
         {
             //create midwives
             for (int i = 0; i < 10; i++)

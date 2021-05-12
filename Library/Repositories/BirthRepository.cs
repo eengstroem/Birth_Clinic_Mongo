@@ -1,15 +1,8 @@
 ﻿using Library.Models.Births;
-using MongoDB.Bson;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
-using Library.Models.Clinicians;
-using Library.Models.Reservations;
-using Library.Models.Rooms;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Library.Repository
 {

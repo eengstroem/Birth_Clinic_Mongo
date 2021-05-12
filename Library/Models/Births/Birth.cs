@@ -1,12 +1,10 @@
 ﻿using Library.Models.Clinicians;
 using Library.Models.FamilyMembers;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using Library.Models.Reservations;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using System;
+using System.Collections.Generic;
 
 namespace Library.Models.Births
 {

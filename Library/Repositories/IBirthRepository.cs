@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Library.Models.Births;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Library.Models.Births;
-using Library.Models.Clinicians;
-using MongoDB.Bson;
 
 namespace Library.Repository
 {

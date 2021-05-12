@@ -1,11 +1,8 @@
-﻿using Library.Models.Births;
-using Library.Models.Reservations;
-using Library.Models.Rooms;
+﻿using Library.Models.Rooms;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Library.Repository
@@ -29,7 +26,7 @@ namespace Library.Repository
         public async Task<Room> Create(Room room)
         {
             await _rooms.InsertOneAsync(room);
-            
+
             return room;
         }
 
@@ -40,7 +37,7 @@ namespace Library.Repository
 
         public IQueryable<Room> GetAll()
         {
-            return  _rooms.AsQueryable();
+            return _rooms.AsQueryable();
         }
 
         public async Task<bool> Update(string id, Room room)
@@ -69,6 +66,6 @@ namespace Library.Repository
         {
             throw new NotImplementedException();
         }
-        
+
     }
 }

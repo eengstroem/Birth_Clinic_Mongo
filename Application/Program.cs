@@ -1,15 +1,12 @@
-﻿using Library.DataGenerator;
+﻿using Library.Config;
+using Library.DataGenerator;
 using Library.Display;
-using Library.Models.Rooms;
-using Microsoft.EntityFrameworkCore;
+using Library.Repository;
+using Library.Services;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 using System;
-using Library.Config;
-using Library.Repository;
-using System.Threading;
 using System.Threading.Tasks;
-using Library.Services;
 
 namespace Application
 {
@@ -32,7 +29,7 @@ namespace Application
 
             while (true)
             {
-                
+
                 Char Input = Display.ReadSingleCharFromDisplay();
 
                 //TODO switch to repositories
@@ -47,8 +44,10 @@ namespace Application
                         Display.Reset();
                         break;
                     case 'C':
-                        Disp.Case5();
-                        Display.Reset();
+                        if (Disp.Case5())
+                        {
+                            Display.Reset();
+                        }
                         break;
                     case 'M':
                         Display.MarioFunny();
