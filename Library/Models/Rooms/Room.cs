@@ -18,12 +18,12 @@ namespace Library.Models.Rooms
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public int Id { get; set; }
+        public string Id { get; set; }
 
         [Required]
         public RoomType RoomType { get; set; }
 
-        public List<int> ReservationIds { get; set; }
+        public List<string> ReservationIds { get; set; }
 
     }
 }

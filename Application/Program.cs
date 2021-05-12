@@ -21,11 +21,11 @@ namespace Application
 
             ServiceProvider ServiceProvider = Services.BuildServiceProvider();
             //TODO update to use repositories instead
-            DataGenerator DG = new(ServiceProvider.GetService<BirthRepository>(), ServiceProvider.GetService<ClinicianRepository>(), ServiceProvider.GetService<RoomRepository>());
+            DataGenerator DG = new(ServiceProvider.GetService<IBirthRepository>(), ServiceProvider.GetService<IClinicianRepository>(), ServiceProvider.GetService<IRoomRepository>());
             DG.GenerateStaticData();
             DG.GenerateData();
 
-            Display Disp = new(ServiceProvider.GetService<BirthRepository>(), ServiceProvider.GetService<ClinicianRepository>(), ServiceProvider.GetService<RoomRepository>());
+            Display Disp = new(ServiceProvider.GetService<IBirthRepository>(), ServiceProvider.GetService<IClinicianRepository>(), ServiceProvider.GetService<IRoomRepository>());
 
 
             while (true)

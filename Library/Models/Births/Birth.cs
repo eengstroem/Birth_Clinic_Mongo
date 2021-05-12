@@ -15,12 +15,12 @@ namespace Library.Models.Births
 
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public int Id { get; set; }
+        public string Id { get; set; }
 
         [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
         public DateTime BirthDate { get; set; }
 
-        public List<int> AssociatedClinicians { get; set; }
+        public List<string> AssociatedClinicians { get; set; }
 
         public List<Child> ChildrenToBeBorn { get; set; }
 

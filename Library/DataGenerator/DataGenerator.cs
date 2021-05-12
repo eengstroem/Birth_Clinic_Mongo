@@ -85,17 +85,16 @@ namespace Library.DataGenerator
 
         public async void GenerateData()
         {
-            //Adding 136 Births since there are 5000 births per year (13.6 per day), and we want to simulate 10 days of fake data.
-            for (int i = 0; i < HowManyBirthsToGenerate; i++)
+            
+            for (var i = 0; i < HowManyBirthsToGenerate; i++)
             {
-                List<Clinician> Clinicians;
                 var B = BirthFactory.CreateFakeBirth();
                 if (!CreateReservations(roomRepo, B, out List<Reservation> reservations))
                 {
                     Console.WriteLine("We are out of rooms");
                     continue;
                 }
-                Clinicians = await AddClinicians(clinicianRepo, B);
+                var Clinicians = await AddClinicians(clinicianRepo, B);
                 if (Clinicians == null)
                 {
 
@@ -106,7 +105,7 @@ namespace Library.DataGenerator
 
                 foreach(Clinician c in Clinicians)
                 {
-                    B.AssociatedClinicians.Add(c._id);
+                    B.AssociatedClinicians.Add(c.Id);
                 }
                 B.Mother = AddMother();
                 Random rand = new();
@@ -186,9 +185,9 @@ namespace Library.DataGenerator
             var BirthStartTime = Birth.BirthDate.AddHours(-12);
             var BirthEndTime = Birth.BirthDate;
 
-            var AvailableMaternityRoom = FindAvailableRooms(RoomRepo, MaternityStartTime, MaternityEndTime, RoomType.MATERNITY);
-            var AvailableBirthRoom = FindAvailableRooms(RoomRepo, MaternityStartTime, MaternityEndTime, RoomType.BIRTH);
-            var AvailableRestRoom = FindAvailableRooms(RoomRepo, MaternityStartTime, MaternityEndTime, RoomType.REST);
+            var AvailableMaternityRoom = FindAvailableRooms(RoomRepo, MaternityStartTime, MaternityEndTime, RoomType.MATERNITY).Result;
+            var AvailableBirthRoom = FindAvailableRooms(RoomRepo, MaternityStartTime, MaternityEndTime, RoomType.BIRTH).Result;
+            var AvailableRestRoom = FindAvailableRooms(RoomRepo, MaternityStartTime, MaternityEndTime, RoomType.REST).Result;
 
             //Not possible to create a birth at the given time. Find another  hospital.
             if (AvailableBirthRoom == null || AvailableMaternityRoom == null || AvailableRestRoom == null)

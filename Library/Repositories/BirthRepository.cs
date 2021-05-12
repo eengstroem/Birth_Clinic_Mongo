@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 using Library.Models.Clinicians;
 using Library.Models.Reservations;
 using Library.Models.Rooms;
@@ -28,23 +29,23 @@ namespace Library.Repository
 
         // CRUD
 
-        public async Task<int> Create(Birth birth)
+        public async Task<string> Create(Birth birth)
         {
             await _births.InsertOneAsync(birth);
             return birth.Id;
         }
 
-        public async Task<Birth> Get(int id)
+        public async Task<Birth> Get(string id)
         {
-            return await _births.Find(b => b.Id == id).FirstOrDefaultAsync();
+            return await _births.Find(b => b.Id == id).FirstAsync();
         }
 
-        public async Task<IEnumerable<Birth>> GetAll()
+        public IQueryable<Birth> GetAll()
         {
-            return await _births.Find(_ => true).ToListAsync();
+            return  _births.AsQueryable();
         }
 
-        public async Task<bool> Update(int id, Birth birth)
+        public async Task<bool> Update(string id, Birth birth)
         {
             var update = Builders<Birth>.Update
                 .Set(b => b.AssociatedClinicians, birth.AssociatedClinicians)
@@ -60,18 +61,18 @@ namespace Library.Repository
             return res.ModifiedCount == 1;
         }
 
-        public async Task<bool> Delete(int id)
+        public async Task<bool> Delete(string id)
         {
             var res = await _births.DeleteOneAsync(b => b.Id == id);
             return res.DeletedCount == 1;
         }
 
         // Specific Task Functionality
-        public async Task<(Birth, List<Clinician>)> GetWithClinicians(int id)
+        public async Task<(Birth, List<Clinician>)> GetWithClinicians(string id)
         {
             var ClinicianList = _client.GetDatabase("BirthClinic").GetCollection<Clinician>(nameof(Clinician));
-            Birth birth = await _births.Find(b => b.Id == id).FirstOrDefaultAsync();
-            List<Clinician> clinicians = await ClinicianList.Find(c => c.AssignedBirthsIds.Contains(birth.Id)).ToListAsync();
+            var birth = await _births.Find(b => b.Id == id).FirstOrDefaultAsync();
+            var clinicians = await ClinicianList.Find(c => c.AssignedBirthsIds.Contains(birth.Id)).ToListAsync();
 
             return (birth, clinicians);
         }
@@ -81,33 +82,35 @@ namespace Library.Repository
             return await _births.Find(b => b.BirthDate > startDate & b.BirthDate < endDate).ToListAsync();
         }
 
-        public async Task<IEnumerable<(Birth, int, IEnumerable<Clinician>)>> GetAllBirthsWithCliniciansUsingBirthRoomAtTime(DateTime time)
+        public async Task<IEnumerable<(Birth, string, IEnumerable<Clinician>)>> GetAllBirthsWithCliniciansUsingBirthRoomAtTime(DateTime time)
         {
             var RoomList = _client.GetDatabase("BirthClinic").GetCollection<Room>(nameof(Room));
             var ClinicianList = _client.GetDatabase("BirthClinic").GetCollection<Clinician>(nameof(Clinician));
             var ValidBirths = await _births.Find(b => b.BirthDate == time).ToListAsync();
-            IEnumerable<(Birth, int, IEnumerable<Clinician>)> result = null;
+            List<(Birth, string, IEnumerable<Clinician>)> result = new();
 
 
             foreach (Birth b in ValidBirths)
             {
-                int room = 0;
+                string roomId;
                 foreach (Reservation res in b.Reservations)
                 {
                     var BirthRoom = await RoomList.Find(r => r.RoomType == RoomType.BIRTH & r.Id == res.ReservedRoomId).FirstOrDefaultAsync();
                     if (BirthRoom != null)
                     {
-                        room = res.ReservedRoomId;
+                        roomId = res.ReservedRoomId;
+                        IEnumerable<Clinician> clinicians = await ClinicianList.Find(c => c.AssignedBirthsIds.Contains(b.Id)).ToListAsync();
+                        result.Append((b, roomId, clinicians));
                     }
                 }
-                IEnumerable<Clinician> clinicians = await ClinicianList.Find(c => c.AssignedBirthsIds.Contains(b.Id)).ToListAsync();
-                result = result.Append((b, room, clinicians));
+                
+                
             }
             return result;
 
         }
 
-        public async Task<bool> EndBirth(int id)
+        public async Task<bool> EndBirth(string id)
         {
             var update = Builders<Birth>.Update
                 .Set(b => b.IsEnded, false);

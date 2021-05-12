@@ -9,7 +9,7 @@ namespace Library.Models.FamilyMembers
     public abstract class FamilyMember
     {
         [BsonRepresentation(BsonType.ObjectId)]
-        public int Id { get; set; }
+        public string Id { get; set; }
 
         public string FirstName { get; set; }
 

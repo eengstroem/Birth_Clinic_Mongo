@@ -11,7 +11,7 @@ namespace Library.Models.Reservations
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public int Id { get; set; }
+        public string Id { get; set; }
 
         [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
         public DateTime StartTime { get; set; }
@@ -19,7 +19,7 @@ namespace Library.Models.Reservations
         [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
         public DateTime EndTime { get; set; }
 
-        public int ReservedRoomId { get; set; }
+        public string ReservedRoomId { get; set; }
 
         public bool IsEndedEarly { get; set; } = false;
 

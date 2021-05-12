@@ -24,23 +24,23 @@ namespace Library.Repository
                 .GetCollection<Room>(nameof(Room));
         }
         // CRUD
-        public async Task<int> Create(Room room)
+        public async Task<string> Create(Room room)
         {
             await _rooms.InsertOneAsync(room);
             return room.Id;
         }
 
-        public async Task<Room> Get(int id)
+        public async Task<Room> Get(string id)
         {
             return await _rooms.Find(r => r.Id == id).FirstOrDefaultAsync();
         }
 
-        public async Task<IEnumerable<Room>> GetAll()
+        public IQueryable<Room> GetAll()
         {
-            return await _rooms.Find(_ => true).ToListAsync();
+            return  _rooms.AsQueryable();
         }
 
-        public async Task<bool> Update(int id, Room room)
+        public async Task<bool> Update(string id, Room room)
         {
             var update = Builders<Room>.Update
                 .Set(r => r.RoomType, room.RoomType);
@@ -48,20 +48,21 @@ namespace Library.Repository
             var res = await _rooms.UpdateOneAsync(r => r.Id == id, update);
             return res.ModifiedCount == 1;
         }
-        public async Task<bool> Delete(int id)
+        public async Task<bool> Delete(string id)
         {
             var res = await _rooms.DeleteOneAsync(r => r.Id == id);
             return res.DeletedCount == 1;
         }
+
         // Specific Task Functionality
-        public async Task<IEnumerable<Room>> GetAllMatching(List<int> ids)
+        public async Task<IEnumerable<Room>> GetAllMatching(List<string> ids)
         {
             return await _rooms.Find(r => ids.Contains(r.Id)).ToListAsync();
         }
 
 
         // ??? I don't get, vi har kun ID og RoomType, så return room og int, why not just get rooms og call .Id?
-        public Task<Dictionary<int, Room>> GetDictionaryOfAllMatching(List<int> ids)
+        public Task<Dictionary<string, Room>> GetDictionaryOfAllMatching(List<string> ids)
         {
             throw new NotImplementedException();
         }
