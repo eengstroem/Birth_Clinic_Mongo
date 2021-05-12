@@ -16,8 +16,5 @@ namespace Library.Repository
         Task<string> Create(Room clinician);
         Task<bool> Update(string id, Room clinician);
         Task<bool> Delete(string id);
-
-        // Specific Task Functionality
-
     }
 }

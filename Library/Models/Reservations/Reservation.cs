@@ -19,7 +19,7 @@ namespace Library.Models.Reservations
         [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
         public DateTime EndTime { get; set; }
 
-        public string ReservedRoomId { get; set; }
+        public Room Room { get; set; }
 
         public bool IsEndedEarly { get; set; } = false;
 

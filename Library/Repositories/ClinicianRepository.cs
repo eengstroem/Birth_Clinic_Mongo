@@ -51,7 +51,6 @@ namespace Library.Repository
         public async Task<bool> Update(string id, Clinician clinician)
         {
             var update = Builders<Clinician>.Update
-                .Set(c => c.AssignedBirthsIds, clinician.AssignedBirthsIds)
                 .Set(c => c.Role, clinician.Role)
                 .Set(c => c.FirstName, clinician.FirstName)
                 .Set(c => c.LastName, clinician.LastName);

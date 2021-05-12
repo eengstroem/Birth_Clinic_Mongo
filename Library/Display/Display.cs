@@ -9,6 +9,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Library.Models.Clinicians;
+using Library.Services;
 using MongoDB.Bson;
 
 namespace Library.Display
@@ -16,15 +17,11 @@ namespace Library.Display
     public class Display
     {
 
-        private readonly IBirthRepository birthRepo;
-        private readonly IClinicianRepository clinicianRepo;
-        private readonly IRoomRepository roomRepo;
+        private readonly IBirthService BirthService;
 
-        public Display(IBirthRepository BirthRepo, IClinicianRepository ClinicianRepo, IRoomRepository RoomRepo)
+        public Display(IBirthService birthService)
         {
-            birthRepo = BirthRepo;
-            clinicianRepo = ClinicianRepo;
-            roomRepo = RoomRepo;
+            BirthService = birthService;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
 
@@ -73,7 +70,7 @@ namespace Library.Display
 
             Console.WriteLine("Hello, please type the corresponding letter to choose one of the following options:");
             Console.WriteLine("A: Show planned births for the coming three days");
-            Console.WriteLine("B: Show the current ongoing births with information about the birth, parents, clinicians associated and the birth room.");
+            Console.WriteLine("birth: Show the current ongoing births with information about the birth, parents, clinicians associated and the birth room.");
             Console.WriteLine("C: Specific information about a specific planned birth");
         }
 
@@ -90,7 +87,7 @@ namespace Library.Display
             Console.Write("A");
             Console.WriteLine("Hello, please type the corresponding letter to choose one of the following options:");
             Console.WriteLine("A: Show planned births for the coming three days");
-            Console.WriteLine("B: Show clinicians, birth rooms, maternity rooms and rest rooms available at the clinic for the next five days");
+            Console.WriteLine("birth: Show clinicians, birth rooms, maternity rooms and rest rooms available at the clinic for the next five days");
             Console.WriteLine("C: Show the current ongoing births with information about the birth, parents, clinicians associated and the birth room.");
             Console.WriteLine("D: Show the maternity rooms and the rest rooms in use with the parent(s) and child(ren) using the room.");
             Console.WriteLine("E: Specific information about a specific planned birth");
@@ -107,7 +104,7 @@ namespace Library.Display
             Console.Clear();
             Console.WriteLine("Hello, please type the corresponding letter to choose one of the following options:");
             Console.WriteLine("A: Show planned births for the coming three days");
-            Console.WriteLine("B: Show clinicians, birth rooms, maternity rooms and rest rooms available at the clinic for the next five days");
+            Console.WriteLine("birth: Show clinicians, birth rooms, maternity rooms and rest rooms available at the clinic for the next five days");
             Console.WriteLine("C: Show the current ongoing births with information about the birth, parents, clinicians associated and the birth room.");
             Console.WriteLine("D: Show the maternity rooms and the rest rooms in use with the parent(s) and child(ren) using the room.");
             Console.WriteLine("E: Specific information about a specific planned birth");
@@ -191,11 +188,11 @@ namespace Library.Display
         {
             Console.Clear();
 
-            //get all births 
-            var BirthList = birthRepo.GetAllWithinTimespan(DateTime.Now, DateTime.Now.AddDays(3)).Result;
-            
-            
-            //select a birth to get further data on
+            //get all births in the next 3 days
+            var BirthList = BirthService.GetAllWithinTimespan(DateTime.Now, DateTime.Now.AddDays(3)).Result;
+
+
+            //select a birth to display further data of
             Console.WriteLine("Please enter a number between 1 and " + BirthList.Count() + ", to view the specific birth's details.");
             var Choice = ReadAndParseInt32FromDisplay();
             Console.Clear();
@@ -203,34 +200,29 @@ namespace Library.Display
             //get the relevant birth
             var B = BirthList.ElementAt(Choice - 1);
 
-            //get the associated clinicians from the db
-            var clinicians = clinicianRepo.GetAllMatching(B.AssociatedClinicians).Result;
-            
-            //Get the Rooms
-            var roomIds = B.Reservations.Select(r => r.ReservedRoomId).ToList();
-            var rooms = roomRepo.GetDictionaryOfAllMatching(roomIds).Result;
+            DisplayBirthInfo(B);
+        }
 
-
+        private static void DisplayBirthInfo(Birth birth)
+        {
             //presentation logic 
-
-
-            foreach (var c in B.ChildrenToBeBorn)
+            foreach (var c in birth.ChildrenToBeBorn)
             {
                 Console.WriteLine("Name: " + c.FirstName + " " + c.LastName);
             }
 
-            Console.WriteLine("Date of birth: " + B.BirthDate.ToLongDateString());
-            Console.WriteLine("Mother: " + B.Mother.FirstName + " " + B.Mother.LastName);
+            Console.WriteLine("Date of birth: " + birth.BirthDate.ToLongDateString());
+            Console.WriteLine("Mother: " + birth.Mother.FirstName + " " + birth.Mother.LastName);
 
-            if (B.Father != null)
+            if (birth.Father != null)
             {
-                Console.WriteLine("Father: " + B.Father.FirstName + " " + B.Father.LastName);
+                Console.WriteLine("Father: " + birth.Father.FirstName + " " + birth.Father.LastName);
             }
 
-            if (B.Relatives.Any())
+            if (birth.Relatives.Any())
             {
                 Console.WriteLine("Relatives:");
-                foreach (var r in B.Relatives)
+                foreach (var r in birth.Relatives)
                 {
                     Console.WriteLine("Name: " + r.FirstName + " " + r.LastName);
                 }
@@ -239,23 +231,24 @@ namespace Library.Display
 
             Console.WriteLine("Clinicians:");
 
-            foreach (var c in clinicians)
+            foreach (var c in birth.AssociatedClinicians)
             {
                 Console.WriteLine(c.Role + ": " + c.FirstName + " " + c.LastName);
             }
 
-            
+
             Console.WriteLine("This birth has the following reservations:");
 
-            foreach (var r in B.Reservations)
+            foreach (var r in birth.Reservations)
             {
-                var room = rooms[r.ReservedRoomId];
+                var room = r.Room;
                 var roomTypeCaps = room.RoomType.ToString();
                 var roomType = roomTypeCaps.Substring(0, 1).ToUpper() + roomTypeCaps[1..].ToLower();
                 Console.WriteLine("Room #" + room.Id + " - " + roomType + " room.");
                 Console.WriteLine("Between: " + r.StartTime.ToLongDateString() + " " + r.StartTime.ToShortTimeString() + " and " + r.EndTime.ToLongDateString() + " " + r.EndTime.ToShortTimeString());
             }
         }
+
 
         public void Case3()
         {
@@ -269,18 +262,22 @@ namespace Library.Display
             &&
             r.EndTime > FilterDate).ToList();*/
 
-            var BirthsWithRoomNumber = birthRepo.GetAllBirthsWithCliniciansUsingBirthRoomAtTime(FilterDate).Result;
+            var births = BirthService.GetAllBirthsUsingABirthRoomAtTime(FilterDate).Result;
 
-
-            if (!BirthsWithRoomNumber.Any())
+            if (!births.Any())
             {
                 Console.WriteLine("There are currently no ongoing births.");
                 return;
             }
-            foreach (var set in BirthsWithRoomNumber)
+
+
+            foreach (var B in births)
             {
-                var B = set.Item1;
-                Console.WriteLine("In Birthroom " + set.Item2 + ".");
+                //Find the birthroom that is in use
+                var birthroom = B.Reservations.Select(r => r.Room)
+                    .First(room => room.RoomType == RoomType.BIRTH);
+
+                Console.WriteLine("In Birthroom " + birthroom.Id + ".");
                 foreach (var c in B.ChildrenToBeBorn)
                 {
                     Console.WriteLine("Name: " + c.FirstName + " " + c.LastName);
@@ -299,7 +296,7 @@ namespace Library.Display
                         Console.WriteLine("Name: " + rel.FirstName + " " + rel.LastName);
                     }
                     Console.WriteLine("Clinicians:");
-                    foreach (var c in set.Item3)
+                    foreach (var c in B.AssociatedClinicians)
                     {
                         Console.WriteLine(c.Role + ": " + c.FirstName + " " + c.LastName);
                     }
@@ -311,7 +308,7 @@ namespace Library.Display
         public void Case5()
         {
             Console.Clear();
-            var births = birthRepo.GetAll().Result;
+            var births = BirthService.GetAll().Result;
 
             foreach (var b in births)
             {
@@ -320,54 +317,15 @@ namespace Library.Display
 
             Console.WriteLine("Please enter a number according to the Journal you wish to read.");
             var Choice = ReadAndParseInt32FromDisplay();
-            
+
             //Select particular birth
             var B = births.ElementAt(Choice - 1);
-           
-            //get clinicians
-            var Clinicians = clinicianRepo.GetAllMatching(B.AssociatedClinicians).Result;
-
-            //Get the Rooms
-            var roomIds = B.Reservations.Select(r => r.ReservedRoomId).ToList();
-            var rooms = roomRepo.GetDictionaryOfAllMatching(roomIds).Result;
 
             Console.Clear();
 
             //presentation logic 
 
-            foreach (var c in B.ChildrenToBeBorn)
-            {
-                Console.WriteLine("Name: " + c.FirstName + " " + c.LastName);
-            }
-            Console.WriteLine("Date of birth: " + B.BirthDate.ToLongDateString());
-            Console.WriteLine("Mother: " + B.Mother.FirstName + " " + B.Mother.LastName);
-            if (B.Father != null)
-            {
-                Console.WriteLine("Father: " + B.Father.FirstName + " " + B.Father.LastName);
-            }
-            if (B.Relatives.Any())
-            {
-                Console.WriteLine("Relatives:");
-                foreach (var r in B.Relatives)
-                {
-                    Console.WriteLine("Name: " + r.FirstName + " " + r.LastName);
-                }
-            }
-            Console.WriteLine("Clinicians:");
-            foreach (var c in Clinicians)
-            {
-                Console.WriteLine(c.Role + ": " + c.FirstName + " " + c.LastName);
-            }
-
-            Console.WriteLine("This birth has the following reservations:");
-            foreach (var r in B.Reservations)
-            {
-                var room = rooms[r.ReservedRoomId];
-                var roomTypeCaps = room.RoomType.ToString();
-                var roomType = roomTypeCaps.Substring(0, 1).ToUpper() + roomTypeCaps[1..].ToLower();
-                Console.WriteLine("Room #" + room.Id + " - " + roomType + " room.");
-                Console.WriteLine("Between: " + r.StartTime.ToLongDateString() + " " + r.StartTime.ToShortTimeString() + " and " + r.EndTime.ToLongDateString() + " " + r.EndTime.ToShortTimeString());
-            }
+            DisplayBirthInfo(B);
         }
     }
 }

@@ -8,6 +8,7 @@ using System;
 using Library.Config;
 using Library.Repository;
 using System.Threading;
+using Library.Services;
 
 namespace Application
 {
@@ -25,7 +26,7 @@ namespace Application
             DG.GenerateStaticData();
             DG.GenerateData();
 
-            Display Disp = new(ServiceProvider.GetService<IBirthRepository>(), ServiceProvider.GetService<IClinicianRepository>(), ServiceProvider.GetService<IRoomRepository>());
+            Display Disp = new(ServiceProvider.GetService<IBirthService>());
 
 
             while (true)

@@ -19,82 +19,82 @@ namespace Library.DataGenerator
 {
     public class DataGenerator
     {
-        private readonly IBirthRepository birthRepo;
-        private readonly IClinicianRepository clinicianRepo;
-        private readonly IRoomRepository roomRepo;
+        private readonly IBirthRepository _birthRepo;
+        private readonly IClinicianRepository _clinicianRepo;
+        private readonly IRoomRepository _roomRepo;
 
         private static readonly int HowManyBirthsToGenerate = 30;
 
-        public DataGenerator(IBirthRepository BirthRepo, IClinicianRepository ClinicianRepo, IRoomRepository RoomRepo)
+        public DataGenerator(IBirthRepository birthRepo, IClinicianRepository clinicianRepo, IRoomRepository roomRepo)
         {
-            birthRepo = BirthRepo;
-            clinicianRepo = ClinicianRepo;
-            roomRepo = RoomRepo;
+            _birthRepo = birthRepo;
+            _clinicianRepo = clinicianRepo;
+            _roomRepo = roomRepo;
         }
-            public async void GenerateStaticData()
+        public async void GenerateStaticData()
         {
             //create midwives
             for (int i = 0; i < 10; i++)
             {
-                await clinicianRepo.Create(ClinicianFactory.CreateFakeClinician(ClinicianType.MIDWIFE));
+                await _clinicianRepo.Create(ClinicianFactory.CreateFakeClinician(ClinicianType.MIDWIFE));
             }
 
             //create nurses
             for (int i = 0; i < 20; i++)
             {
-                await clinicianRepo.Create(ClinicianFactory.CreateFakeClinician(ClinicianType.NURSE));
+                await _clinicianRepo.Create(ClinicianFactory.CreateFakeClinician(ClinicianType.NURSE));
             }
 
             //create assistants
             for (int i = 0; i < 20; i++)
             {
-                await clinicianRepo.Create(ClinicianFactory.CreateFakeClinician(ClinicianType.HEALTH_ASSISTANT));
+                await _clinicianRepo.Create(ClinicianFactory.CreateFakeClinician(ClinicianType.HEALTH_ASSISTANT));
             }
 
             //create Doctors
             for (int i = 0; i < 5; i++)
             {
-                await clinicianRepo.Create(ClinicianFactory.CreateFakeClinician(ClinicianType.DOCTOR));
+                await _clinicianRepo.Create(ClinicianFactory.CreateFakeClinician(ClinicianType.DOCTOR));
             }
 
             //create Secretaries
             for (int i = 0; i < 4; i++)
             {
-                await clinicianRepo.Create(ClinicianFactory.CreateFakeClinician(ClinicianType.SECRETARY));
+                await _clinicianRepo.Create(ClinicianFactory.CreateFakeClinician(ClinicianType.SECRETARY));
             }
 
             //create Maternity Rooms
             for (int i = 0; i < 22; i++)
             {
-                await roomRepo.Create(RoomFactory.CreateRoom(RoomType.MATERNITY));
+                await _roomRepo.Create(RoomFactory.CreateRoom(RoomType.MATERNITY));
             }
 
             //create Rest Rooms
             for (int i = 0; i < 5; i++)
             {
-                await roomRepo.Create(RoomFactory.CreateRoom(RoomType.REST));
+                await _roomRepo.Create(RoomFactory.CreateRoom(RoomType.REST));
             }
 
             //create Birth Rooms
             for (int i = 0; i < 15; i++)
             {
-                await roomRepo.Create(RoomFactory.CreateRoom(RoomType.BIRTH));
+                await _roomRepo.Create(RoomFactory.CreateRoom(RoomType.BIRTH));
             }
 
         }
 
         public async void GenerateData()
         {
-            
+
             for (var i = 0; i < HowManyBirthsToGenerate; i++)
             {
                 var B = BirthFactory.CreateFakeBirth();
-                if (!CreateReservations(roomRepo, B, out List<Reservation> reservations))
+                if (!CreateReservations(_roomRepo, B, out List<Reservation> reservations))
                 {
                     Console.WriteLine("We are out of rooms");
                     continue;
                 }
-                var Clinicians = await AddClinicians(clinicianRepo, B);
+                var Clinicians = await AddClinicians(_clinicianRepo);
                 if (Clinicians == null)
                 {
 
@@ -103,10 +103,7 @@ namespace Library.DataGenerator
 
                 B.Reservations.AddRange(reservations);
 
-                foreach(Clinician c in Clinicians)
-                {
-                    B.AssociatedClinicians.Add(c.Id);
-                }
+                B.AssociatedClinicians = Clinicians;
                 B.Mother = AddMother();
                 Random rand = new();
                 if (rand.Next(1, 10) > 1)
@@ -119,58 +116,22 @@ namespace Library.DataGenerator
 
                 B.IsEnded = false;
 
-                await birthRepo.Create(B);
+                await _birthRepo.Create(B);
             }
         }
 
         //TODO switch to single instead of where
-        public static async Task<Room> FindAvailableRooms(IRoomRepository RoomRepo, DateTime StartTime, DateTime EndTime, RoomType Type)
+        public static async Task<Room> FindAvailableRooms(IRoomRepository RoomRepo, RoomType type)
         {
-            try
-            {
-                return await RoomRepo.GetUnreservedRoomOfType(StartTime, EndTime, Type);
-            }
-            catch
-            {
-                return null;
-            }
+            var rooms = await RoomRepo.GetAll().Where(r => r.RoomType == type).ToListAsync();
+            var random = new Random();
+            int index = random.Next(rooms.Count);
+            return rooms[index];
         }
 
-        public async static Task<IEnumerable<Clinician>> FindAvailableClinicians(IClinicianRepository ClinicianRepo, Birth Birth, ClinicianType Role)
+        public static async Task<List<Clinician>> FindAvailableClinicians(IClinicianRepository clinicianRepo, ClinicianType role)
         {
-            int RequiredDelta = 0;
-            int AllowedOccurences = 0;
-
-            switch (Role)
-            {
-                case ClinicianType.DOCTOR:
-                    RequiredDelta = 12;
-                    AllowedOccurences = 4;
-                    break;
-                case ClinicianType.HEALTH_ASSISTANT:
-                    RequiredDelta = 4;
-                    AllowedOccurences = 2;
-
-                    break;
-                case ClinicianType.MIDWIFE:
-                    RequiredDelta = 120;
-                    AllowedOccurences = 8;
-
-                    break;
-                case ClinicianType.NURSE:
-                    RequiredDelta = 136;
-                    AllowedOccurences = 9;
-
-                    break;
-                case ClinicianType.SECRETARY:
-                    // Secretary only has to check in the birth, so she is freed up immediately, but still associated.
-                    AllowedOccurences = 50000;
-
-                    break;
-            }
-
-            return await ClinicianRepo.FindAvailableClinicians(Role, Birth, RequiredDelta, AllowedOccurences);
-
+            return await clinicianRepo.GetAll().Where(c => c.Role == role).ToListAsync();
 
         }
 
@@ -185,9 +146,9 @@ namespace Library.DataGenerator
             var BirthStartTime = Birth.BirthDate.AddHours(-12);
             var BirthEndTime = Birth.BirthDate;
 
-            var AvailableMaternityRoom = FindAvailableRooms(RoomRepo, MaternityStartTime, MaternityEndTime, RoomType.MATERNITY).Result;
-            var AvailableBirthRoom = FindAvailableRooms(RoomRepo, MaternityStartTime, MaternityEndTime, RoomType.BIRTH).Result;
-            var AvailableRestRoom = FindAvailableRooms(RoomRepo, MaternityStartTime, MaternityEndTime, RoomType.REST).Result;
+            var AvailableMaternityRoom = FindAvailableRooms(RoomRepo, RoomType.MATERNITY).Result;
+            var AvailableBirthRoom = FindAvailableRooms(RoomRepo, RoomType.BIRTH).Result;
+            var AvailableRestRoom = FindAvailableRooms(RoomRepo, RoomType.REST).Result;
 
             //Not possible to create a birth at the given time. Find another  hospital.
             if (AvailableBirthRoom == null || AvailableMaternityRoom == null || AvailableRestRoom == null)
@@ -202,21 +163,21 @@ namespace Library.DataGenerator
                 {
                     StartTime = MaternityStartTime,
                     EndTime = MaternityEndTime,
-                    ReservedRoomId = AvailableMaternityRoom.Id
+                    Room = AvailableMaternityRoom
                 };
 
                 var BirthRes = new Reservation
                 {
                     StartTime = BirthStartTime,
                     EndTime = BirthEndTime,
-                    ReservedRoomId = AvailableBirthRoom.Id
+                    Room = AvailableBirthRoom
                 };
 
                 var RestRes = new Reservation
                 {
                     StartTime = RestStartTime,
                     EndTime = RestEndTime,
-                    ReservedRoomId = AvailableRestRoom.Id
+                    Room = AvailableRestRoom
                 };
 
                 reservations = new List<Reservation> { MaternityRes, BirthRes, RestRes };
@@ -224,64 +185,64 @@ namespace Library.DataGenerator
             }
         }
 
-        public async static Task<List<Clinician>> AddClinicians(IClinicianRepository ClinicianRepo, Birth Birth)
+        public static async Task<List<Clinician>> AddClinicians(IClinicianRepository clinicianRepo)
         {
-            List<Clinician> Clinicians;
+            List<Clinician> Clinicians = new();
             Random Rand = new();
-            IEnumerable<Clinician> FoundClinicians;
-            Clinicians = new();
 
             // Finds available Doctor and inserts one random available Doctor into output List.
-            FoundClinicians = await FindAvailableClinicians(ClinicianRepo, Birth, ClinicianType.DOCTOR);
-            if (!FoundClinicians.Any())
+            var Doctors = FindAvailableClinicians(clinicianRepo, ClinicianType.DOCTOR).Result;
+            if (!Doctors.Any())
             {
+
                 Console.WriteLine("We are out of Doctors");
                 return null;
             }
-            Clinicians.Add(FoundClinicians.ElementAt(Rand.Next(0, FoundClinicians.Count())));
+            Clinicians.Add(Doctors.ElementAt(Rand.Next(0, Doctors.Count)));
 
 
             // Finds available Midwife and inserts one random available Midwife into output List.
-            FoundClinicians = await FindAvailableClinicians(ClinicianRepo, Birth, ClinicianType.MIDWIFE);
-            if (!FoundClinicians.Any())
+            var Midwives = await FindAvailableClinicians(clinicianRepo, ClinicianType.MIDWIFE);
+            if (!Midwives.Any())
             {
                 Console.WriteLine("We are out of Midwives");
                 return null;
             }
-            Clinicians.Add(FoundClinicians.ElementAt(Rand.Next(0, FoundClinicians.Count())));
+            Clinicians.Add(Midwives.ElementAt(Rand.Next(0, Midwives.Count)));
 
 
             // Finds available Nurse and inserts two random available Nurse into output List.
-            FoundClinicians = await FindAvailableClinicians(ClinicianRepo, Birth, ClinicianType.NURSE);
+            var Nurses = await FindAvailableClinicians(clinicianRepo, ClinicianType.NURSE);
 
-            if (FoundClinicians.Count() < 2)
+            if (Nurses.Count < 2)
             {
                 Console.WriteLine("We are out of Nurses");
                 return null;
             }
 
-            Clinicians.Add(FoundClinicians.ElementAt(0));
-            Clinicians.Add(FoundClinicians.ElementAt(1));
+            //TODO måske find noget der gør så det ikke kun er de første 2 nurses
+            Clinicians.Add(Nurses.ElementAt(0));
+            Clinicians.Add(Nurses.ElementAt(1));
 
 
             // Finds available Assistant and inserts two random available Assistant into output List.
-            FoundClinicians = await FindAvailableClinicians(ClinicianRepo, Birth, ClinicianType.HEALTH_ASSISTANT);
-            if (!FoundClinicians.Any())
+            var Assistants = await FindAvailableClinicians(clinicianRepo, ClinicianType.HEALTH_ASSISTANT);
+            if (!Assistants.Any())
             {
                 Console.WriteLine("We are out of Health Assistants");
                 return null;
             }
-            Clinicians.Add(FoundClinicians.ElementAt(Rand.Next(0, FoundClinicians.Count())));
+            Clinicians.Add((Assistants.ElementAt(Rand.Next(0, Assistants.Count))));
 
 
             // Finds available Secretary and inserts two random available Secretary into output List.
-            FoundClinicians = await FindAvailableClinicians(ClinicianRepo, Birth, ClinicianType.SECRETARY);
-            if (!FoundClinicians.Any())
+            var Secretaries = await FindAvailableClinicians(clinicianRepo, ClinicianType.SECRETARY);
+            if (!Secretaries.Any())
             {
                 Console.WriteLine("We are out of Secretaries");
                 return null;
             }
-            Clinicians.Add(FoundClinicians.ElementAt(Rand.Next(0, FoundClinicians.Count())));
+            Clinicians.Add(Secretaries.ElementAt(Rand.Next(0, Secretaries.Count)));
 
             return Clinicians;
         }
@@ -315,6 +276,7 @@ namespace Library.DataGenerator
             List<Child> Children = new();
 
             Children.Add((Child)CreateFakeFamilyMember(FamilyMemberType.CHILD));
+
             if (weight > 0.75)
             {
                 Children.Add((Child)CreateFakeFamilyMember(FamilyMemberType.CHILD));
@@ -329,6 +291,6 @@ namespace Library.DataGenerator
             }
             return Children;
         }
-        
+
     }
 }
